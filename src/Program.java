@@ -1,7 +1,7 @@
 public class Program 
 {
 	// Address of PGen output table.
-	public static final String stPath = "";
+	public static final String stPath = "/home/arash/Desktop/Compiler/Blend/parser.npt";
 	
 	public static String inputPath = "";
 	public static String outputPath = "";
