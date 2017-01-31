@@ -1,3 +1,4 @@
+character v := a;
 structure s1
 {
 	integer a := 4;
