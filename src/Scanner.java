@@ -31,14 +31,14 @@ public class Scanner {
     public String NextToken() throws Exception {
         Token token = flexScanner.NextToken();
         lineNumber = flexScanner.lineNumber();
-        System.out.println(String.format("flex scanner output: type: %s id: %s\nline number: %d",
+        System.out.println(String.format("flex scanner output: entryType: %s id: %s\nline number: %d",
                 token.type, token.id, lineNumber));
         if (token.type.equals("STRING") ||
                 token.type.equals("idINT") ||
                 token.type.equals("idHEX") ||
                 token.type.equals("idREAL") ||
                 token.type.equals("idCHAR")) {
-            System.out.println(String.format("constant detected type: %s value: %s", token.type,
+            System.out.println(String.format("constant detected entryType: %s value: %s", token.type,
                     token.id));
             CV = token.id;
             System.out.println("return value is: " + token.type);
