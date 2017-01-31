@@ -150,7 +150,10 @@ public class CodeGenerator {
 			// TODO
 		} else if (sem.equals("@pushFalse")) {
 			// TODO
+		} else if (sem.equals("@makeStruct")) {
+			// TODO
 		}
+
 	}
 
 	public void FinishCode() // You may need this
@@ -169,7 +172,8 @@ public class CodeGenerator {
 			output = output + code.getText();
 		}
 		try {
-			PrintWriter writer = new PrintWriter(new File("sampleProgram.out"), "UTF-8");
+			PrintWriter writer = new PrintWriter(new File("sampleProgram.out"),
+					"UTF-8");
 			writer.println(output);
 			writer.close();
 		} catch (IOException e) {

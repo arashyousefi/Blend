@@ -539,8 +539,8 @@
         "isFinal": false
       },
       {
-        "x": 430.0,
-        "y": 95.0,
+        "x": 529.0,
+        "y": 92.0,
         "id": 29,
         "isFinal": true
       },
@@ -925,6 +925,16 @@
         "func": "makeLong",
         "anchorX": 248.0,
         "anchorY": 218.5,
+        "isGraph": false,
+        "isGlobal": false
+      },
+      {
+        "start": 44,
+        "end": 45,
+        "token": "structType",
+        "func": "makeStruct",
+        "anchorX": 254.0,
+        "anchorY": 271.5,
         "isGraph": false,
         "isGlobal": false
       }

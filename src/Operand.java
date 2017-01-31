@@ -1,4 +1,4 @@
-package symbolTableEntry;
+
 
 public class Operand {
 	String addressMode, type, value;
