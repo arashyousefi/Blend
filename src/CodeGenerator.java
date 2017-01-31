@@ -173,7 +173,8 @@ public class CodeGenerator {
 			writer.println(output);
 			writer.close();
 		} catch (IOException e) {
-			// do something
+            System.out.println("Error creating output file!");
+            e.printStackTrace();
 		}
 	}
 }

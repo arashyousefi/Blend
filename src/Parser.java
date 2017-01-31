@@ -2,13 +2,15 @@ import java.util.ArrayList;
 import java.util.Stack;
 
 public class Parser {
-    Scanner scanner;
-    CodeGenerator cg;
-    PTBlock[][] parseTable;
-    Stack<Integer> parseStack = new Stack<Integer>();
-    String[] symbols;
-    SymbolTable currentSymbolTable = new SymbolTable();
-    ArrayList<SymbolTable> display = new ArrayList<>();
+    public Scanner scanner;
+    public CodeGenerator cg;
+    public PTBlock[][] parseTable;
+    public Stack<Integer> parseStack = new Stack<Integer>();
+    public String[] symbols;
+    public SymbolTable currentSymbolTable = new SymbolTable();
+    public ArrayList<SymbolTable> display = new ArrayList<>();
+    public ArrayList<String> structs = new ArrayList<>();
+    public String lastStruct;
 
     public Parser(String inputFile, String[] symbols, PTBlock[][] parseTable) {
         try {
@@ -16,7 +18,7 @@ public class Parser {
             this.symbols = symbols;
             this.display.add(currentSymbolTable);
 
-            scanner = new Scanner(inputFile);
+            scanner = new Scanner(inputFile, this);
             cg = new CodeGenerator(scanner);
         } catch (Exception e) {
             e.printStackTrace();
