@@ -1,1 +1,13 @@
-array integer a;
+structure s1
+{
+	integer a := 4;
+	character b;
+}
+environment env1
+{
+	integer a;
+	character b;
+}
+function (integer) main()
+{
+}
