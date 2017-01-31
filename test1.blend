@@ -11,4 +11,7 @@ environment env1
 }
 function (integer) main()
 {
+	integer a := 4;
+	integer b := 5;
+	write(a+b);
 }
