@@ -26,7 +26,6 @@ public class CodeGenerator {
 		else if (sem.equals("@aDscp")) {
 			// TODO
 		} else if (sem.equals("@push")) {
-			System.out.println("fuck");
 			// ss.add(e);
 		} else if (sem.equals("@assign")) {
 			// TODO
@@ -151,6 +150,8 @@ public class CodeGenerator {
 		} else if (sem.equals("@pushFalse")) {
 			// TODO
 		} else if (sem.equals("@makeStruct")) {
+			// TODO
+		} else if (sem.equals("@isVoid")) {
 			// TODO
 		}
 
