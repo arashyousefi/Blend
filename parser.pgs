@@ -566,19 +566,9 @@
         "start": 27,
         "end": 28,
         "token": "{",
-        "func": "",
+        "func": "addStr",
         "anchorX": 258.5,
         "anchorY": 90.5,
-        "isGraph": false,
-        "isGlobal": false
-      },
-      {
-        "start": 28,
-        "end": 29,
-        "token": "}",
-        "func": "addStr",
-        "anchorX": 372.0,
-        "anchorY": 93.0,
         "isGraph": false,
         "isGlobal": false
       },
@@ -590,6 +580,16 @@
         "anchorX": 318.0,
         "anchorY": 142.0,
         "isGraph": true,
+        "isGlobal": false
+      },
+      {
+        "start": 28,
+        "end": 29,
+        "token": "}",
+        "func": "",
+        "anchorX": 372.0,
+        "anchorY": 93.0,
+        "isGraph": false,
         "isGlobal": false
       },
       {

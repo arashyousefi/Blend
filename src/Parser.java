@@ -19,7 +19,7 @@ public class Parser {
             this.display.add(currentSymbolTable);
 
             scanner = new Scanner(inputFile, this);
-            cg = new CodeGenerator(scanner);
+            cg = new CodeGenerator(scanner, this);
         } catch (Exception e) {
             e.printStackTrace();
         }

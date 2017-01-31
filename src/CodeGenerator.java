@@ -10,12 +10,13 @@ public class CodeGenerator {
 						// detected by Scanner, you can do whatever you like
 
 	// Define any variables needed for code generation
-
+	Parser parser;
 	ArrayList<SymbolTableEntry> ss = new ArrayList<>();
 	ArrayList<Code> codes = new ArrayList<Code>();
 
-	public CodeGenerator(Scanner scanner) {
+	public CodeGenerator(Scanner scanner, Parser parser) {
 		this.scanner = scanner;
+		this.parser = parser;
 	}
 
 	public void Generate(String sem) {
@@ -32,6 +33,7 @@ public class CodeGenerator {
 		} else if (sem.equals("@assignStr")) {
 			// TODO
 		} else if (sem.equals("@addStr")) {
+			parser.structs.add(scanner.previousID);
 			// TODO
 		} else if (sem.equals("@addEnv")) {
 			// TODO

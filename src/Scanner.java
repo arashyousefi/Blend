@@ -7,11 +7,12 @@ import java.io.InputStream;
  */
 public class Scanner {
     public String CV;
+    public String previousID;
     int lineNumber = 1;
     Parser parser;
     private FlexScanner flexScanner;
     private InputStream inputStream;
-
+  
     Scanner(String filename, Parser parser) throws Exception {
         this.parser = parser;
         inputStream = new FileInputStream(filename);
@@ -50,6 +51,7 @@ public class Scanner {
         }
         if (token.type.equals("idID")) {
             System.out.println("return value is: " + "id");
+            previousID = token.id;
             for (String s : parser.structs) {
                 if (s.equals(token.id)) {
                     parser.lastStruct = token.id;
