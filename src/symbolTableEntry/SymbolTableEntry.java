@@ -8,11 +8,11 @@ public class SymbolTableEntry {
     public static final int ARRAY = 5;
 
     public String name;
-    public int type;
+    public int entryType;
 
-    public SymbolTableEntry(String name, int type) {
+    public SymbolTableEntry(String name, int entryType) {
         this.name = name;
-        this.type = type;
+        this.entryType = entryType;
     }
 
     public SymbolTableEntry() {
