@@ -24,6 +24,10 @@ public class Scanner {
 //        // ...
     }
 
+    public int getLineNumber() {
+        return (lineNumber = flexScanner.lineNumber());
+    }
+
     public String NextToken() throws Exception {
         Token token = flexScanner.NextToken();
         lineNumber = flexScanner.lineNumber();
