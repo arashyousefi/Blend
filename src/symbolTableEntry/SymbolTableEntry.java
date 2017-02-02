@@ -9,10 +9,11 @@ public class SymbolTableEntry {
 
     public String name;
     public int entryType;
-
-    public SymbolTableEntry(String name, int entryType) {
+    public int address;
+    public SymbolTableEntry(String name, int entryType, int address) {
         this.name = name;
         this.entryType = entryType;
+        this.address = address;
     }
 
     public SymbolTableEntry() {

@@ -12,6 +12,7 @@ public class Code {
 
 	public String getText() {
 		String text1 = "", text2 = "", text3 = "";
+		
 		if (op1 != null)
 			text1 = op1.getText();
 		if (op2 != null)
@@ -19,6 +20,6 @@ public class Code {
 		if (op3 != null)
 			text3 = op3.getText();
 
-		return opcode + " " + text1 + " " + text2 + " " + text3 + "\n";
+		return opcode + " " + text1 + " " + text2 + " " + text3;
 	}
 }

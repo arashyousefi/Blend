@@ -22,8 +22,8 @@ public class SymbolTable {
         return null;
     }
 
-    public SymbolTableEntry addSymbol(String name, int type) {
-        SymbolTableEntry symbolTableEntry = new SymbolTableEntry(name, type);
+    public SymbolTableEntry addSymbol(String name, int type, int address) {
+        SymbolTableEntry symbolTableEntry = new SymbolTableEntry(name, type,address);
         symbols.add(symbolTableEntry);
         return symbolTableEntry;
     }
