@@ -37,51 +37,56 @@ public class CodeGenerator {
 			} else {
 				// get heap address:
 				codes.add(new Code(":=", new Operand("gd", "i", "0"),
-						new Operand("ld", "i", "0"), null));
+						new Operand("gd", "i", "4"), null));
 				// add relative address
-				codes.add(new Code("+", new Operand("ld", "i", "0"),
+				codes.add(new Code("+", new Operand("gd", "i", "4"),
 						new Operand("im", "i", Integer.toString(id.address)),
-						new Operand("ld", "i", "0")));
+						new Operand("gd", "i", "4")));
 				// find the stack pointer
-				codes.add(new Code(":=sp", new Operand("ld", "i", "4"), null,
+				codes.add(new Code(":=sp", new Operand("gd", "i", "8"), null,
 						null));
 				// push relative address:
-				codes.add(new Code(":=", new Operand("ld", "i", "0"),
-						new Operand("li", "i", "4"), null));
+				codes.add(new Code(":=", new Operand("gd", "i", "4"),
+						new Operand("gi", "i", "8"), null));
 				// increase stack pointer
-				codes.add(new Code("+", new Operand("ld", "i", "4"),
+				codes.add(new Code("+", new Operand("gd", "i", "8"),
 						new Operand("im", "i", "4"),
-						new Operand("ld", "i", "4")));
+						new Operand("gd", "i", "8")));
 				// set stack pointer
-				codes.add(new Code("sp:=", new Operand("ld", "i", "4"), null,
+				codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null,
 						null));
 				System.out.println(id.name + "pushed with value:" + id.address);
 			}
 		} else if (sem.equals("@assign")) {
 			// find the stack pointer
-			codes.add(new Code(":=sp", new Operand("ld", "i", "0"), null, null));
-			// pop second operand
-			codes.add(new Code(":=", new Operand("li", "i", "0"), new Operand(
-					"ld", "i", "4"), null));
+			codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
 			// decrease stack pointer
-			codes.add(new Code("-", new Operand("ld", "i", "0"), new Operand(
-					"im", "i", "4"), new Operand("ld", "i", "0")));
+			codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand(
+					"im", "i", "4"), new Operand("gd", "i", "4")));
 			// set stack pointer
-			codes.add(new Code("sp:=", new Operand("ld", "i", "0"), null, null));
+			codes.add(new Code("sp:=", new Operand("gd", "i", "4"), null, null));
 			// find the stack pointer
-			codes.add(new Code(":=sp", new Operand("ld", "i", "0"), null, null));
-			// pop first operand
-			codes.add(new Code(":=", new Operand("li", "i", "0"), new Operand(
-					"ld", "i", "8"), null));
+			codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
+			// pop second operand
+			codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand(
+					"gd", "i", "8"), null));
+
+			// find the stack pointer
+			codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
 			// decrease stack pointer
-			codes.add(new Code("-", new Operand("ld", "i", "0"), new Operand(
-					"im", "i", "4"), new Operand("ld", "i", "0")));
+			codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand(
+					"im", "i", "4"), new Operand("gd", "i", "4")));
 			// set stack pointer
-			codes.add(new Code("sp:=", new Operand("ld", "i", "0"), null, null));
+			codes.add(new Code("sp:=", new Operand("gd", "i", "4"), null, null));
+			// find the stack pointer
+			codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
+			// pop first operand
+			codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand(
+					"gd", "i", "12"), null));
 
 			// assign the two
-			codes.add(new Code(":=", new Operand("li", "i", "4"), new Operand(
-					"li", "i", "8"), null));
+			codes.add(new Code(":=", new Operand("gi", "i", "8"), new Operand(
+					"gi", "i", "12"), null));
 
 		} else if (sem.equals("@assignStr")) {
 			// TODO
@@ -130,7 +135,7 @@ public class CodeGenerator {
 				relativeAddress++;
 			if (type.equals("long"))
 				relativeAddress += 8;
-
+			this.Generate("@push");
 		} else if (sem.equals("@addArg")) {
 			// TODO
 		} else if (sem.equals("@makeLate")) {
@@ -181,41 +186,47 @@ public class CodeGenerator {
 			// TODO
 		} else if (sem.equals("@add")) {
 			// find the stack pointer
-			codes.add(new Code(":=sp", new Operand("ld", "i", "0"), null, null));
-			// pop second operand
-			codes.add(new Code(":=", new Operand("li", "i", "0"), new Operand(
-					"ld", "i", "4"), null));
+			codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
 			// decrease stack pointer
-			codes.add(new Code("-", new Operand("ld", "i", "0"), new Operand(
-					"im", "i", "4"), new Operand("ld", "i", "0")));
+			codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand(
+					"im", "i", "4"), new Operand("gd", "i", "4")));
 			// set stack pointer
-			codes.add(new Code("sp:=", new Operand("ld", "i", "0"), null, null));
+			codes.add(new Code("sp:=", new Operand("gd", "i", "4"), null, null));
 			// find the stack pointer
-			codes.add(new Code(":=sp", new Operand("ld", "i", "0"), null, null));
-			// pop first operand
-			codes.add(new Code(":=", new Operand("li", "i", "0"), new Operand(
-					"ld", "i", "8"), null));
+			codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
+			// pop second operand
+			codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand(
+					"gd", "i", "8"), null));
+
+			// find the stack pointer
+			codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
 			// decrease stack pointer
-			codes.add(new Code("-", new Operand("ld", "i", "0"), new Operand(
-					"im", "i", "4"), new Operand("ld", "i", "0")));
+			codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand(
+					"im", "i", "4"), new Operand("gd", "i", "4")));
 			// set stack pointer
-			codes.add(new Code("sp:=", new Operand("ld", "i", "0"), null, null));
+			codes.add(new Code("sp:=", new Operand("gd", "i", "4"), null, null));
+			// find the stack pointer
+			codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
+			// pop first operand
+			codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand(
+					"gd", "i", "12"), null));
+
 			// get temp
-			codes.add(new Code("gmm", new Operand("ld", "i", "12"),
+			codes.add(new Code("gmm", new Operand("gd", "i", "16"),
 					new Operand("im", "i", "4"), null));
 			// add the two
-			codes.add(new Code("+", new Operand("li", "i", "4"), new Operand(
-					"li", "i", "8"), new Operand("li", "i", "12")));
+			codes.add(new Code("+", new Operand("gi", "i", "8"), new Operand(
+					"gi", "i", "12"), new Operand("gi", "i", "16")));
 			// find the stack pointer
-			codes.add(new Code(":=sp", new Operand("ld", "i", "0"), null, null));
+			codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
 			// push result
-			codes.add(new Code(":=", new Operand("ld", "i", "12"), new Operand(
-					"li", "i", "0"), null));
+			codes.add(new Code(":=", new Operand("gd", "i", "16"), new Operand(
+					"gi", "i", "4"), null));
 			// increase stack pointer
-			codes.add(new Code("+", new Operand("ld", "i", "0"), new Operand(
-					"im", "i", "4"), new Operand("ld", "i", "0")));
+			codes.add(new Code("+", new Operand("gd", "i", "4"), new Operand(
+					"im", "i", "4"), new Operand("gd", "i", "4")));
 			// set stack pointer
-			codes.add(new Code("sp:=", new Operand("ld", "i", "0"), null, null));
+			codes.add(new Code("sp:=", new Operand("gd", "i", "4"), null, null));
 
 		} else if (sem.equals("@subtract")) {
 			// TODO
@@ -256,36 +267,37 @@ public class CodeGenerator {
 				relativeAddress += 4;
 				// set the constant
 				codes.add(new Code(":=", new Operand("gd", "i", "0"),
-						new Operand("ld", "i", "0"), null));
+						new Operand("gd", "i", "4"), null));
 				// add relative address
-				codes.add(new Code("+", new Operand("ld", "i", "0"),
+				codes.add(new Code("+", new Operand("gd", "i", "4"),
 						new Operand("im", "i", Integer.toString(id.address)),
-						new Operand("ld", "i", "0")));
+						new Operand("gd", "i", "4")));
+				// set constant value
 				codes.add(new Code(":=", new Operand("im", "i", scanner.CV),
-						new Operand("li", "i", "0"), null));
+						new Operand("gi", "i", "4"), null));
 				notSet = false;
 			}
 			// push the entry
 			// get heap address:
 			if (notSet) {
 				codes.add(new Code(":=", new Operand("gd", "i", "0"),
-						new Operand("ld", "i", "0"), null));
+						new Operand("gd", "i", "4"), null));
 				// add relative address
-				codes.add(new Code("+", new Operand("ld", "i", "0"),
+				codes.add(new Code("+", new Operand("gd", "i", "4"),
 						new Operand("im", "i", Integer.toString(id.address)),
-						new Operand("ld", "i", "0")));
+						new Operand("gd", "i", "4")));
 			}
 			// push relative address:
 			// find the stack pointer
-			codes.add(new Code(":=sp", new Operand("ld", "i", "4"), null, null));
+			codes.add(new Code(":=sp", new Operand("gd", "i", "8"), null, null));
 			// push relative address:
-			codes.add(new Code(":=", new Operand("ld", "i", "0"), new Operand(
-					"li", "i", "4"), null));
+			codes.add(new Code(":=", new Operand("gd", "i", "4"), new Operand(
+					"gi", "i", "8"), null));
 			// increase stack pointer
-			codes.add(new Code("+", new Operand("ld", "i", "4"), new Operand(
-					"im", "i", "4"), new Operand("ld", "i", "4")));
+			codes.add(new Code("+", new Operand("gd", "i", "8"), new Operand(
+					"im", "i", "4"), new Operand("gd", "i", "8")));
 			// set stack pointer
-			codes.add(new Code("sp:=", new Operand("ld", "i", "4"), null, null));
+			codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null, null));
 			System.out.println(id.name + "pushed with value:" + id.address);
 
 		} else if (sem.equals("@makeConstCharacter")) {
@@ -303,10 +315,20 @@ public class CodeGenerator {
 		} else if (sem.equals("@isVoid")) {
 			// TODO
 		} else if (sem.equals("@write")) {
-			// get top of stack
-			codes.add(new Code(":=sp", new Operand("ld", "i", "0"), null, null));
-			// print it
-			codes.add(new Code("wi", new Operand("li", "i", "0"), null, null));
+			// find the stack pointer
+			codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
+			// decrease stack pointer
+			codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand(
+					"im", "i", "4"), new Operand("gd", "i", "4")));
+			// set stack pointer
+			codes.add(new Code("sp:=", new Operand("gd", "i", "4"), null, null));
+			// find the stack pointer
+			codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
+			// pop top
+			codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand(
+					"gd", "i", "8"), null));
+			// find the value of the targeted address
+			codes.add(new Code("wi", new Operand("gi", "i", "8"), null, null));
 		}
 
 	}

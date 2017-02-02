@@ -2,4 +2,7 @@ function (integer) main()
 {
 	integer a := 4;
 	write(a);
+	integer b := 5;
+	write(b);
+	write(a+b);
 }
