@@ -4,5 +4,7 @@ function (integer) main()
 	write(a);
 	integer b := 5;
 	write(b);
-	write(a+b);
+	integer c:= 2;
+	write(c);
+	write(a+b*c^1);
 }

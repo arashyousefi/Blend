@@ -11,7 +11,7 @@ public class CodeGenerator {
 
 	// Define any variables needed for code generation
 	Parser parser;
-	ArrayList<SymbolTableEntry> ss = new ArrayList<>();
+	ArrayList<String> ss = new ArrayList<>();
 	ArrayList<Code> codes = new ArrayList<Code>();
 	int relativeAddress = 0;
 	String type;
@@ -55,7 +55,8 @@ public class CodeGenerator {
 				// set stack pointer
 				codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null,
 						null));
-				System.out.println(id.name + "pushed with value:" + id.address);
+				ss.add("Var");
+
 			}
 		} else if (sem.equals("@assign")) {
 			// find the stack pointer
@@ -163,85 +164,43 @@ public class CodeGenerator {
 		} else if (sem.equals("@findProperty")) {
 			// TODO
 		} else if (sem.equals("@logicalOr")) {
-			// TODO
+			binary("||");
 		} else if (sem.equals("@logicalAnd")) {
-			// TODO
+			binary("&&");
 		} else if (sem.equals("@bitWiseOr")) {
-			// TODO
+			binary("|");
 		} else if (sem.equals("@bitWiseAnd")) {
-			// TODO
+			binary("&");
 		} else if (sem.equals("@xor")) {
-			// TODO
+			binary("^");
 		} else if (sem.equals("@equal")) {
-			// TODO
+			binary("==");
 		} else if (sem.equals("@notEqual")) {
-			// TODO
+			binary("!=");
 		} else if (sem.equals("@less")) {
-			// TODO
+			binary("<");
 		} else if (sem.equals("@lessEqual")) {
-			// TODO
+			binary("<=");
 		} else if (sem.equals("@more")) {
-			// TODO
+			binary(">");
 		} else if (sem.equals("@moreEqual")) {
-			// TODO
+			binary(">=");
 		} else if (sem.equals("@add")) {
-			// find the stack pointer
-			codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
-			// decrease stack pointer
-			codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand(
-					"im", "i", "4"), new Operand("gd", "i", "4")));
-			// set stack pointer
-			codes.add(new Code("sp:=", new Operand("gd", "i", "4"), null, null));
-			// find the stack pointer
-			codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
-			// pop second operand
-			codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand(
-					"gd", "i", "8"), null));
-
-			// find the stack pointer
-			codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
-			// decrease stack pointer
-			codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand(
-					"im", "i", "4"), new Operand("gd", "i", "4")));
-			// set stack pointer
-			codes.add(new Code("sp:=", new Operand("gd", "i", "4"), null, null));
-			// find the stack pointer
-			codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
-			// pop first operand
-			codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand(
-					"gd", "i", "12"), null));
-
-			// get temp
-			codes.add(new Code("gmm", new Operand("gd", "i", "16"),
-					new Operand("im", "i", "4"), null));
-			// add the two
-			codes.add(new Code("+", new Operand("gi", "i", "8"), new Operand(
-					"gi", "i", "12"), new Operand("gi", "i", "16")));
-			// find the stack pointer
-			codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
-			// push result
-			codes.add(new Code(":=", new Operand("gd", "i", "16"), new Operand(
-					"gi", "i", "4"), null));
-			// increase stack pointer
-			codes.add(new Code("+", new Operand("gd", "i", "4"), new Operand(
-					"im", "i", "4"), new Operand("gd", "i", "4")));
-			// set stack pointer
-			codes.add(new Code("sp:=", new Operand("gd", "i", "4"), null, null));
-
+			binary("+");
 		} else if (sem.equals("@subtract")) {
-			// TODO
+			binary("-");
 		} else if (sem.equals("@mult")) {
-			// TODO
+			binary("*");
 		} else if (sem.equals("@divide")) {
-			// TODO
+			binary("/");
 		} else if (sem.equals("@remainder")) {
-			// TODO
+			binary("%");
 		} else if (sem.equals("@uMinus")) {
-			// TODO
+			unary("u-");
 		} else if (sem.equals("@uComplement")) {
-			// TODO
+			unary("~");
 		} else if (sem.equals("@uNot")) {
-			// TODO
+			unary("!");
 		} else if (sem.equals("@jz")) {
 			// TODO
 		} else if (sem.equals("@jzCmpJz")) {
@@ -298,7 +257,7 @@ public class CodeGenerator {
 					"im", "i", "4"), new Operand("gd", "i", "8")));
 			// set stack pointer
 			codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null, null));
-			System.out.println(id.name + "pushed with value:" + id.address);
+			ss.add("Var");
 
 		} else if (sem.equals("@makeConstCharacter")) {
 			// TODO
@@ -315,22 +274,27 @@ public class CodeGenerator {
 		} else if (sem.equals("@isVoid")) {
 			// TODO
 		} else if (sem.equals("@write")) {
-			// find the stack pointer
-			codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
-			// decrease stack pointer
-			codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand(
-					"im", "i", "4"), new Operand("gd", "i", "4")));
-			// set stack pointer
-			codes.add(new Code("sp:=", new Operand("gd", "i", "4"), null, null));
-			// find the stack pointer
-			codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
-			// pop top
-			codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand(
-					"gd", "i", "8"), null));
+			popFirst();
 			// find the value of the targeted address
 			codes.add(new Code("wi", new Operand("gi", "i", "8"), null, null));
+		} else if (sem.equals("@pop")) {
+			popFirst();
 		}
 
+	}
+
+	private void pushCurrent() {
+		// find the stack pointer
+		codes.add(new Code(":=sp", new Operand("gd", "i", "8"), null, null));
+		// push relative address:
+		codes.add(new Code(":=", new Operand("gd", "i", "4"), new Operand("gi",
+				"i", "8"), null));
+		// increase stack pointer
+		codes.add(new Code("+", new Operand("gd", "i", "8"), new Operand("im",
+				"i", "4"), new Operand("gd", "i", "8")));
+		// set stack pointer
+		codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null, null));
+		ss.add("Value");
 	}
 
 	private void init() {
@@ -340,11 +304,87 @@ public class CodeGenerator {
 
 	}
 
+	private void binary(String operand) {
+
+		popFirst();
+		popSecond();
+		// get a temp
+		codes.add(new Code("gmm", new Operand("im", "i", "4"), new Operand(
+				"gd", "i", "4"), null));
+		// binary this and push
+		codes.add(new Code(operand, new Operand("gi", "i", "8"), new Operand(
+				"gi", "i", "12"), new Operand("gi", "i", "4")));
+		this.pushCurrent();
+	}
+
+	private void unary(String operand) {
+		popFirst();
+		// get a temp
+		codes.add(new Code("gmm", new Operand("im", "i", "4"), new Operand(
+				"gd", "i", "4"), null));
+		// unary this and set currentValue
+		codes.add(new Code(operand, new Operand("gi", "i", "8"), new Operand(
+				"gi", "i", "4"), null));
+		// push currentValue
+		this.pushCurrent();
+		ss.add("Value");
+	}
+
+	private void popFirst() {
+		// find the stack pointer
+		codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
+		// decrease stack pointer
+		codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand("im",
+				"i", "4"), new Operand("gd", "i", "4")));
+		// set stack pointer
+		codes.add(new Code("sp:=", new Operand("gd", "i", "4"), null, null));
+		// find the stack pointer
+		codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
+		// pop operand
+		codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand("gd",
+				"i", "8"), null));
+
+		freeIfTemp();
+
+	}
+
+	private void freeIfTemp() {
+		String popped = ss.get(ss.size() - 1);
+		if (popped.equals("Value"))
+
+			codes.add(new Code("fmm", new Operand("gd", "i", "8"), new Operand(
+					"im", "i", "4"), null));
+	}
+
+	private void popSecond() {
+		// find the stack pointer
+		codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
+		// decrease stack pointer
+		codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand("im",
+				"i", "4"), new Operand("gd", "i", "4")));
+		// set stack pointer
+		codes.add(new Code("sp:=", new Operand("gd", "i", "4"), null, null));
+		// find the stack pointer
+		codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
+		// pop first operand
+		codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand("gd",
+				"i", "12"), null));
+		// freeIfTemp();
+		freeIfTemp2();
+	}
+
+	private void freeIfTemp2() {
+		String popped = ss.get(ss.size() - 1);
+		if (popped.equals("Value"))
+
+			codes.add(new Code("fmm", new Operand("gd", "i", "12"), new Operand(
+					"im", "i", "4"), null));
+	}
+
 	public void FinishCode() // You may need this
 	{
 		codes.add(new Code("fmm", new Operand("gd", "i", "0"), new Operand(
 				"im", "i", "1024"), null));
-
 	}
 
 	public void WriteOutput(String outputName) {
