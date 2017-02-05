@@ -2293,7 +2293,7 @@
       {
         "start": 108,
         "end": 110,
-        "token": "\u003d\u003d",
+        "token": "\u003d",
         "func": "equal",
         "anchorX": 352.0,
         "anchorY": 152.5,

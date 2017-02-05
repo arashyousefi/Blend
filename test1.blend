@@ -1,10 +1,7 @@
 function (integer) main()
 {
 	integer a := 4;
-	write(a);
 	integer b := 5;
-	write(b);
-	integer c:= 2;
-	write(c);
-	write(a+b*c^1);
+	integer c := 2;
+	write(a+b*c);
 }
