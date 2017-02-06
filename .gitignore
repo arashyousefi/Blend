@@ -1,9 +1,12 @@
 .idea/
 out/
+bin/
 *.iml
 *.blend~
 
 src/makefile~
+
+src/Program.java
 
 *.class
 

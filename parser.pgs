@@ -1402,7 +1402,7 @@
         "start": 55,
         "end": 67,
         "token": "do",
-        "func": "",
+        "func": "pushPC",
         "anchorX": 89.5,
         "anchorY": 421.5,
         "isGraph": false,
@@ -3539,8 +3539,8 @@
         "isFinal": false
       },
       {
-        "x": 565.0,
-        "y": 99.0,
+        "x": 630.0,
+        "y": 93.0,
         "id": 172,
         "isFinal": true
       }
@@ -3570,7 +3570,7 @@
         "start": 170,
         "end": 171,
         "token": ")",
-        "func": "cmpJz",
+        "func": "",
         "anchorX": 381.0,
         "anchorY": 90.5,
         "isGraph": false,
@@ -3580,9 +3580,9 @@
         "start": 171,
         "end": 172,
         "token": "BLOCK",
-        "func": "",
-        "anchorX": 470.0,
-        "anchorY": 104.0,
+        "func": "whileJpCjz",
+        "anchorX": 490.0,
+        "anchorY": 102.0,
         "isGraph": true,
         "isGlobal": false
       }
@@ -3644,9 +3644,9 @@
         "start": 174,
         "end": 175,
         "token": "while",
-        "func": "jz",
-        "anchorX": 316.0,
-        "anchorY": 111.0,
+        "func": "doJz",
+        "anchorX": 317.0,
+        "anchorY": 105.0,
         "isGraph": false,
         "isGlobal": false
       },
@@ -3674,7 +3674,7 @@
         "start": 177,
         "end": 178,
         "token": ")",
-        "func": "cmpJz",
+        "func": "",
         "anchorX": 475.5,
         "anchorY": 257.0,
         "isGraph": false,
