@@ -2,9 +2,11 @@ function (integer) main()
 {
 	integer a := 4;
 	integer b := 2;
-	integer c := 2;
+	integer c := 1;
 	if(a = b*c){
-		write(a*b+a*b);
+		write(a);
+	}else{
+	    write(c);
 	}
-	write(a);
+	write(b);
 }
