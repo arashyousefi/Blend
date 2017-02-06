@@ -2819,7 +2819,7 @@
       {
         "start": 132,
         "end": 127,
-        "token": "EXPR",
+        "token": "FIC",
         "func": "uComplement",
         "anchorX": 344.5,
         "anchorY": 205.0,
@@ -2829,7 +2829,7 @@
       {
         "start": 133,
         "end": 127,
-        "token": "EXPR",
+        "token": "FIC",
         "func": "uNot",
         "anchorX": 370.5,
         "anchorY": 136.5,
@@ -2839,7 +2839,7 @@
       {
         "start": 134,
         "end": 127,
-        "token": "EXPR",
+        "token": "FIC",
         "func": "uMinus",
         "anchorX": 412.0,
         "anchorY": 95.5,
