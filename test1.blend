@@ -7,5 +7,10 @@ function (integer) main()
 	    write(a);
 	    a := a-1;
 	}
+	do{
+	    write(a);
+	    a := a+1;
+	}while(a < 5)
+	write(a);
 	write(-1);
 }

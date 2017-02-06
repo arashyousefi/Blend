@@ -218,9 +218,10 @@ public class CodeGenerator {
             codes.add(new Code("jmp", new Operand("im", "i", whileEvalLine.toString())));
         } else if (sem.equals("@pushPC")) {
             pushSS(getPc() + 1);
-        } else if (sem.equals("@doJz")) {
+        } else if (sem.equals("@doJz")) {//it should be doJnz
             popFirst();
             Integer doLine = (Integer) popSS();
+            codes.add(new Code("!", new Operand("gi", "b", "8"), new Operand("gi", "b", "8")));
             // generate the jump Code
             codes.add(new Code("jz", new Operand("gi", "b", "8"),
                     new Operand("im", "i", doLine.toString())));
