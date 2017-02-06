@@ -32,31 +32,26 @@ public class CodeGenerator {
 		else if (sem.equals("@aDscp")) {
 			// TODO
 		} else if (sem.equals("@push")) {
-			SymbolTableEntry id = parser.currentSymbolTable.findSymbol(
-					scanner.previousID, true);
+			SymbolTableEntry id = parser.currentSymbolTable.findSymbol(scanner.previousID, true);
 			if (id == null) {
 				// TODO runtime exception here!
 			} else {
 				// get heap address:
-				codes.add(new Code(":=", new Operand("gd", "i", "0"),
-						new Operand("gd", "i", "4"), null));
-				// add relative address
-				codes.add(new Code("+", new Operand("gd", "i", "4"),
-						new Operand("im", "i", Integer.toString(id.address)),
-						new Operand("gd", "i", "4")));
-				// find the stack pointer
-				codes.add(new Code(":=sp", new Operand("gd", "i", "8"), null,
+				codes.add(new Code(":=", new Operand("gd", "i", "0"), new Operand("gd", "i", "4"),
 						null));
+				// add relative address
+				codes.add(new Code("+", new Operand("gd", "i", "4"), new Operand("im", "i",
+						Integer.toString(id.address)), new Operand("gd", "i", "4")));
+				// find the stack pointer
+				codes.add(new Code(":=sp", new Operand("gd", "i", "8"), null, null));
 				// push relative address:
-				codes.add(new Code(":=", new Operand("gd", "i", "4"),
-						new Operand("gi", "i", "8"), null));
+				codes.add(new Code(":=", new Operand("gd", "i", "4"), new Operand("gi", "i", "8"),
+						null));
 				// increase stack pointer
-				codes.add(new Code("+", new Operand("gd", "i", "8"),
-						new Operand("im", "i", "4"),
+				codes.add(new Code("+", new Operand("gd", "i", "8"), new Operand("im", "i", "4"),
 						new Operand("gd", "i", "8")));
 				// set stack pointer
-				codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null,
-						null));
+				codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null, null));
 				ss.add(id);
 
 			}
@@ -98,8 +93,8 @@ public class CodeGenerator {
 		} else if (sem.equals("@makeLong")) {
 			type = "long";
 		} else if (sem.equals("@make")) {
-			parser.currentSymbolTable.addSymbol(scanner.previousID,
-					SymbolTableEntry.VAR, relativeAddress, false, type);
+			parser.currentSymbolTable.addSymbol(scanner.previousID, SymbolTableEntry.VAR,
+					relativeAddress, false, type);
 			// needs TODO if we want to implement structures!
 			if (type.equals("boolean"))
 				++relativeAddress;
@@ -192,16 +187,14 @@ public class CodeGenerator {
 			int pc = (Integer) (ss.get(ss.size() - 1));
 			ss.remove(ss.size() - 1);
 			Code jumpCode = codes.get(pc);
-			jumpCode.op2 = new Operand("im", "i",
-					Integer.toString(codes.size()));
+			jumpCode.op2 = new Operand("im", "i", Integer.toString(codes.size()));
 
 		} else if (sem.equals("@cmpJz")) {
 			// get pc
 			int pc = (Integer) (ss.get(ss.size() - 1));
 			ss.remove(ss.size() - 1);
 			Code jumpCode = codes.get(pc);
-			jumpCode.op2 = new Operand("im", "i",
-					Integer.toString(codes.size()));
+			jumpCode.op2 = new Operand("im", "i", Integer.toString(codes.size()));
 
 		} else if (sem.equals("@jpLink")) {
 			// TODO
@@ -213,45 +206,41 @@ public class CodeGenerator {
 			// TODO
 		} else if (sem.equals("@makeConstInteger")) {
 			// find the constant if not found make an entry
-			SymbolTableEntry id = parser.currentSymbolTable.findSymbol(
-					scanner.CV, true);
+			SymbolTableEntry id = parser.currentSymbolTable.findSymbol(scanner.CV, true);
 			boolean notSet = true;
 			if (id == null) {
-				id = parser.currentSymbolTable
-						.addSymbol(scanner.CV, SymbolTableEntry.VAR,
-								relativeAddress, false, "integer");
+				id = parser.currentSymbolTable.addSymbol(scanner.CV, SymbolTableEntry.VAR,
+						relativeAddress, false, "integer");
 				relativeAddress += 4;
 				// set the constant
-				codes.add(new Code(":=", new Operand("gd", "i", "0"),
-						new Operand("gd", "i", "4"), null));
+				codes.add(new Code(":=", new Operand("gd", "i", "0"), new Operand("gd", "i", "4"),
+						null));
 				// add relative address
-				codes.add(new Code("+", new Operand("gd", "i", "4"),
-						new Operand("im", "i", Integer.toString(id.address)),
-						new Operand("gd", "i", "4")));
+				codes.add(new Code("+", new Operand("gd", "i", "4"), new Operand("im", "i",
+						Integer.toString(id.address)), new Operand("gd", "i", "4")));
 				// set constant value
-				codes.add(new Code(":=", new Operand("im", "i", scanner.CV),
-						new Operand("gi", "i", "4"), null));
+				codes.add(new Code(":=", new Operand("im", "i", scanner.CV), new Operand("gi",
+						"i", "4"), null));
 				notSet = false;
 			}
 			// push the entry
 			// get heap address:
 			if (notSet) {
-				codes.add(new Code(":=", new Operand("gd", "i", "0"),
-						new Operand("gd", "i", "4"), null));
+				codes.add(new Code(":=", new Operand("gd", "i", "0"), new Operand("gd", "i", "4"),
+						null));
 				// add relative address
-				codes.add(new Code("+", new Operand("gd", "i", "4"),
-						new Operand("im", "i", Integer.toString(id.address)),
-						new Operand("gd", "i", "4")));
+				codes.add(new Code("+", new Operand("gd", "i", "4"), new Operand("im", "i",
+						Integer.toString(id.address)), new Operand("gd", "i", "4")));
 			}
 			// push relative address:
 			// find the stack pointer
 			codes.add(new Code(":=sp", new Operand("gd", "i", "8"), null, null));
 			// push relative address:
-			codes.add(new Code(":=", new Operand("gd", "i", "4"), new Operand(
-					"gi", "i", "8"), null));
+			codes.add(new Code(":=", new Operand("gd", "i", "4"), new Operand("gi", "i", "8"),
+					null));
 			// increase stack pointer
-			codes.add(new Code("+", new Operand("gd", "i", "8"), new Operand(
-					"im", "i", "4"), new Operand("gd", "i", "8")));
+			codes.add(new Code("+", new Operand("gd", "i", "8"), new Operand("im", "i", "4"),
+					new Operand("gd", "i", "8")));
 			// set stack pointer
 			codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null, null));
 			ss.add(id);
@@ -274,14 +263,11 @@ public class CodeGenerator {
 			// find the value of the targeted address
 			String type = popFirst();
 			if (type.equals("integer"))
-				codes.add(new Code("wi", new Operand("gi", "i", "8"), null,
-						null));
+				codes.add(new Code("wi", new Operand("gi", "i", "8"), null, null));
 			if (type.equals("real"))
-				codes.add(new Code("wf", new Operand("gi", "i", "8"), null,
-						null));
+				codes.add(new Code("wf", new Operand("gi", "i", "8"), null, null));
 			if (type.equals("string"))
-				codes.add(new Code("wt", new Operand("gi", "i", "8"), null,
-						null));
+				codes.add(new Code("wt", new Operand("gi", "i", "8"), null, null));
 
 		} else if (sem.equals("@pop")) {
 			popFirst();
@@ -289,14 +275,11 @@ public class CodeGenerator {
 			// find the value of the targeted address
 			String type = popFirst();
 			if (type.equals("integer"))
-				codes.add(new Code("ri", new Operand("gi", "i", "8"), null,
-						null));
+				codes.add(new Code("ri", new Operand("gi", "i", "8"), null, null));
 			if (type.equals("real"))
-				codes.add(new Code("rf", new Operand("gi", "i", "8"), null,
-						null));
+				codes.add(new Code("rf", new Operand("gi", "i", "8"), null, null));
 			if (type.equals("string"))
-				codes.add(new Code("rt", new Operand("gi", "i", "8"), null,
-						null));
+				codes.add(new Code("rt", new Operand("gi", "i", "8"), null, null));
 
 		}
 
@@ -306,11 +289,10 @@ public class CodeGenerator {
 		// find the stack pointer
 		codes.add(new Code(":=sp", new Operand("gd", "i", "8"), null, null));
 		// push relative address:
-		codes.add(new Code(":=", new Operand("gd", "i", "4"), new Operand("gi",
-				"i", "8"), null));
+		codes.add(new Code(":=", new Operand("gd", "i", "4"), new Operand("gi", "i", "8"), null));
 		// increase stack pointer
-		codes.add(new Code("+", new Operand("gd", "i", "8"), new Operand("im",
-				"i", "4"), new Operand("gd", "i", "8")));
+		codes.add(new Code("+", new Operand("gd", "i", "8"), new Operand("im", "i", "4"),
+				new Operand("gd", "i", "8")));
 		// set stack pointer
 		codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null, null));
 		ss.add(new SymbolTableEntry("temp", 1, 0, true, type));
@@ -318,8 +300,8 @@ public class CodeGenerator {
 
 	private void init() {
 
-		codes.add(new Code("gmm", new Operand("im", "i", "1024"), new Operand(
-				"gd", "i", "0"), null));
+		codes.add(new Code("gmm", new Operand("im", "i", "1024"), new Operand("gd", "i", "0"),
+				null));
 
 	}
 
@@ -327,11 +309,11 @@ public class CodeGenerator {
 		// condition change if cast!
 		if (popFirst().equals("integer") && popSecond().equals("integer")) {
 			// get a temp
-			codes.add(new Code("gmm", new Operand("im", "i", "4"), new Operand(
-					"gd", "i", "4"), null));
+			codes.add(new Code("gmm", new Operand("im", "i", "4"), new Operand("gd", "i", "4"),
+					null));
 			// binary this and push
-			codes.add(new Code(operand, new Operand("gi", "i", "8"),
-					new Operand("gi", "i", "12"), new Operand("gi", "i", "4")));
+			codes.add(new Code(operand, new Operand("gi", "i", "8"), new Operand("gi", "i", "12"),
+					new Operand("gi", "i", "4")));
 			this.pushCurrent("integer");
 		} else {
 			// TODO ERROR!
@@ -342,11 +324,11 @@ public class CodeGenerator {
 
 		if (popFirst().equals("integer")) {
 			// get a temp
-			codes.add(new Code("gmm", new Operand("im", "i", "4"), new Operand(
-					"gd", "i", "4"), null));
+			codes.add(new Code("gmm", new Operand("im", "i", "4"), new Operand("gd", "i", "4"),
+					null));
 			// unary this and set currentValue
-			codes.add(new Code(operand, new Operand("gi", "i", "8"),
-					new Operand("gi", "i", "4"), null));
+			codes.add(new Code(operand, new Operand("gi", "i", "8"), new Operand("gi", "i", "4"),
+					null));
 			// push currentValue
 			this.pushCurrent("integer");
 		} else {
@@ -361,15 +343,14 @@ public class CodeGenerator {
 		// find the stack pointer
 		codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
 		// decrease stack pointer
-		codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand("im",
-				"i", "4"), new Operand("gd", "i", "4")));
+		codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand("im", "i", "4"),
+				new Operand("gd", "i", "4")));
 		// set stack pointer
 		codes.add(new Code("sp:=", new Operand("gd", "i", "4"), null, null));
 		// find the stack pointer
 		codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
 		// pop operand
-		codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand("gd",
-				"i", "8"), null));
+		codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand("gd", "i", "8"), null));
 
 		freeIfTemp(popped);
 		return popped.type;
@@ -377,8 +358,8 @@ public class CodeGenerator {
 
 	private void freeIfTemp(SymbolTableEntry popped) {
 		if (popped.isValue)
-			codes.add(new Code("fmm", new Operand("gd", "i", "8"), new Operand(
-					"im", "i", "4"), null));
+			codes.add(new Code("fmm", new Operand("gd", "i", "8"), new Operand("im", "i", "4"),
+					null));
 	}
 
 	private String popSecond() {
@@ -388,15 +369,14 @@ public class CodeGenerator {
 		// find the stack pointer
 		codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
 		// decrease stack pointer
-		codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand("im",
-				"i", "4"), new Operand("gd", "i", "4")));
+		codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand("im", "i", "4"),
+				new Operand("gd", "i", "4")));
 		// set stack pointer
 		codes.add(new Code("sp:=", new Operand("gd", "i", "4"), null, null));
 		// find the stack pointer
 		codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
 		// pop first operand
-		codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand("gd",
-				"i", "12"), null));
+		codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand("gd", "i", "12"), null));
 		// freeIfTemp();
 		freeIfTemp2(popped);
 		return popped.type;
@@ -404,14 +384,14 @@ public class CodeGenerator {
 
 	private void freeIfTemp2(SymbolTableEntry popped) {
 		if (popped.isValue)
-			codes.add(new Code("fmm", new Operand("gd", "i", "12"),
-					new Operand("im", "i", "4"), null));
+			codes.add(new Code("fmm", new Operand("gd", "i", "12"), new Operand("im", "i", "4"),
+					null));
 	}
 
 	public void FinishCode() // You may need this
 	{
-		codes.add(new Code("fmm", new Operand("gd", "i", "0"), new Operand(
-				"im", "i", "1024"), null));
+		codes.add(new Code("fmm", new Operand("gd", "i", "0"), new Operand("im", "i", "1024"),
+				null));
 	}
 
 	public void WriteOutput(String outputName) {
@@ -422,8 +402,7 @@ public class CodeGenerator {
 		// (strongly NOT recommended!!)
 		String output = "";
 		try {
-			PrintWriter writer = new PrintWriter(new File("sampleProgram.out"),
-					"UTF-8");
+			PrintWriter writer = new PrintWriter(new File("sampleProgram.out"), "UTF-8");
 			for (Code code : codes) {
 				output = code.getText();
 				// writer.append(output);
