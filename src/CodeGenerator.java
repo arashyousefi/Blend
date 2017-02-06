@@ -13,7 +13,7 @@ public class CodeGenerator {
 
 	// Define any variables needed for code generation
 	Parser parser;
-	ArrayList<SymbolTableEntry> ss = new ArrayList<>();
+	ArrayList<Object> ss = new ArrayList<>();
 	ArrayList<Code> codes = new ArrayList<Code>();
 	int relativeAddress = 0;
 	String type;
@@ -86,11 +86,11 @@ public class CodeGenerator {
 		} else if (sem.equals("@cmpFunc")) {
 			// TODO
 		} else if (sem.equals("@makeBool")) {
-			type = "bool";
+			type = "boolean";
 		} else if (sem.equals("@makeInteger")) {
-			type = "int";
+			type = "integer";
 		} else if (sem.equals("@makeCharacter")) {
-			type = "char";
+			type = "character";
 		} else if (sem.equals("@makeString")) {
 			type = "string";
 		} else if (sem.equals("@makeReal")) {
@@ -101,9 +101,9 @@ public class CodeGenerator {
 			parser.currentSymbolTable.addSymbol(scanner.previousID,
 					SymbolTableEntry.VAR, relativeAddress, false, type);
 			// needs TODO if we want to implement structures!
-			if (type.equals("bool"))
+			if (type.equals("boolean"))
 				++relativeAddress;
-			if (type.equals("int"))
+			if (type.equals("integer"))
 				relativeAddress += 4;
 			if (type.equals("string")) {
 				// TODO
@@ -111,7 +111,7 @@ public class CodeGenerator {
 			if (type.equals("real"))
 				relativeAddress += 4;
 
-			if (type.equals("char"))
+			if (type.equals("character"))
 				relativeAddress++;
 			if (type.equals("long"))
 				relativeAddress += 8;
@@ -181,11 +181,28 @@ public class CodeGenerator {
 		} else if (sem.equals("@uNot")) {
 			unary("!");
 		} else if (sem.equals("@jz")) {
-			// TODO
-		} else if (sem.equals("@jzCmpJz")) {
-			// TODO
+			popFirst();
+			// generate the jump Code
+			codes.add(new Code("jz", new Operand("gi", "b", "8"), null, null));
+			// push pc
+			ss.add(codes.size() - 1);
+
+		} else if (sem.equals("@jpCmpJz")) {
+			// get pc
+			int pc = (Integer) (ss.get(ss.size() - 1));
+			ss.remove(ss.size() - 1);
+			Code jumpCode = codes.get(pc);
+			jumpCode.op2 = new Operand("im", "i",
+					Integer.toString(codes.size()));
+
 		} else if (sem.equals("@cmpJz")) {
-			// TODO
+			// get pc
+			int pc = (Integer) (ss.get(ss.size() - 1));
+			ss.remove(ss.size() - 1);
+			Code jumpCode = codes.get(pc);
+			jumpCode.op2 = new Operand("im", "i",
+					Integer.toString(codes.size()));
+
 		} else if (sem.equals("@jpLink")) {
 			// TODO
 		} else if (sem.equals("@fillLinks")) {
@@ -285,7 +302,7 @@ public class CodeGenerator {
 
 	}
 
-	private void pushCurrent() {
+	private void pushCurrent(String type) {
 		// find the stack pointer
 		codes.add(new Code(":=sp", new Operand("gd", "i", "8"), null, null));
 		// push relative address:
@@ -296,7 +313,7 @@ public class CodeGenerator {
 				"i", "4"), new Operand("gd", "i", "8")));
 		// set stack pointer
 		codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null, null));
-		ss.add(SymbolTableEntry.value);
+		ss.add(new SymbolTableEntry("temp", 1, 0, true, type));
 	}
 
 	private void init() {
@@ -315,7 +332,7 @@ public class CodeGenerator {
 			// binary this and push
 			codes.add(new Code(operand, new Operand("gi", "i", "8"),
 					new Operand("gi", "i", "12"), new Operand("gi", "i", "4")));
-			this.pushCurrent();
+			this.pushCurrent("integer");
 		} else {
 			// TODO ERROR!
 		}
@@ -331,8 +348,7 @@ public class CodeGenerator {
 			codes.add(new Code(operand, new Operand("gi", "i", "8"),
 					new Operand("gi", "i", "4"), null));
 			// push currentValue
-			this.pushCurrent();
-			ss.add(SymbolTableEntry.value);
+			this.pushCurrent("integer");
 		} else {
 			// TODO ERROR!
 		}
@@ -340,7 +356,7 @@ public class CodeGenerator {
 
 	private String popFirst() {
 		// checkType
-		SymbolTableEntry popped = ss.get(ss.size() - 1);
+		SymbolTableEntry popped = (SymbolTableEntry) ss.get(ss.size() - 1);
 		ss.remove(ss.size() - 1);
 		// find the stack pointer
 		codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
@@ -367,7 +383,7 @@ public class CodeGenerator {
 
 	private String popSecond() {
 		// checkType
-		SymbolTableEntry popped = ss.get(ss.size() - 1);
+		SymbolTableEntry popped = (SymbolTableEntry) ss.get(ss.size() - 1);
 		ss.remove(ss.size() - 1);
 		// find the stack pointer
 		codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));

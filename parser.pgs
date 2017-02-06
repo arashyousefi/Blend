@@ -1219,8 +1219,8 @@
         "isFinal": false
       },
       {
-        "x": 210.0,
-        "y": 666.0,
+        "x": 238.0,
+        "y": 659.0,
         "id": 69,
         "isFinal": false
       },
@@ -2294,7 +2294,7 @@
         "start": 108,
         "end": 110,
         "token": "\u003d",
-        "func": "equal",
+        "func": "",
         "anchorX": 352.0,
         "anchorY": 152.5,
         "isGraph": false,
@@ -2314,7 +2314,7 @@
         "start": 110,
         "end": 108,
         "token": "E4",
-        "func": "",
+        "func": "equal",
         "anchorX": 330.0,
         "anchorY": 177.5,
         "isGraph": true,
@@ -3765,8 +3765,8 @@
         "end": 183,
         "token": "BLOCK",
         "func": "cmpJz",
-        "anchorX": 365.0,
-        "anchorY": 84.0,
+        "anchorX": 362.0,
+        "anchorY": 82.0,
         "isGraph": true,
         "isGlobal": false
       },
@@ -3784,7 +3784,7 @@
         "start": 184,
         "end": 185,
         "token": "BLOCK",
-        "func": "",
+        "func": "cmpJp",
         "anchorX": 523.0,
         "anchorY": 160.0,
         "isGraph": true,

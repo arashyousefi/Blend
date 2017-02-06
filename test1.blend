@@ -1,7 +1,10 @@
 function (integer) main()
 {
 	integer a := 4;
-	integer b := 5;
+	integer b := 2;
 	integer c := 2;
-	write(a+b*c);
+	if(a = b*c){
+		write(a*b+a*b);
+	}
+	write(a);
 }

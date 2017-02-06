@@ -12,7 +12,6 @@ public class SymbolTableEntry {
 	public int address;
 	public boolean isValue;
 	public String type;
-	public static SymbolTableEntry value = new SymbolTableEntry();
 
 	public SymbolTableEntry(String name, int entryType, int address,
 			boolean val, String type) {
@@ -20,7 +19,6 @@ public class SymbolTableEntry {
 		this.entryType = entryType;
 		this.address = address;
 		this.isValue = val;
-		value.isValue = true;
 		if (entryType == 1)
 			this.type = type;
 	}
