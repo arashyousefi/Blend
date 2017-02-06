@@ -6,5 +6,10 @@ function (integer) main()
 	if(a = b*c){
 		write(a);
 	}
-	write(b);
+	if( -1 = (2 - 1)){
+	    write(3);
+	}else{
+	    write(4);
+	}
+	write(-1);
 }

@@ -193,7 +193,7 @@ public class CodeGenerator {
 //            Code jumpCode = codes.get(lastIf);
             previousIf.op2 = new Operand("im", "i", Integer.toString(codes.size() + 1));
 
-            codes.add(new Code("jp"));
+            codes.add(new Code("jmp"));
             ss.add(codes.size() - 1);
         } else if (sem.equals("@cmpJp")) {
 
@@ -317,7 +317,7 @@ public class CodeGenerator {
             codes.add(new Code("gmm", new Operand("im", "i", "4"), new Operand("gd", "i", "4"),
                     null));
             // binary this and push
-            codes.add(new Code(operand, new Operand("gi", "i", "8"), new Operand("gi", "i", "12"),
+            codes.add(new Code(operand, new Operand("gi", "i", "12"), new Operand("gi", "i", "8"),
                     new Operand("gi", "i", "4")));
             this.pushCurrent("integer");
         } else {
