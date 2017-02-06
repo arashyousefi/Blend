@@ -3,6 +3,7 @@ import symbolTableEntry.SymbolTableEntry;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 public class CodeGenerator {
@@ -37,231 +38,461 @@ public class CodeGenerator {
 
     public void Generate(String sem) {
         System.out.println(sem); // Just for debug
-
         if (sem.equals("NoSem"))
             return;
-        else if (sem.equals("@aDscp")) {
-            // TODO
-        } else if (sem.equals("@push")) {
-            SymbolTableEntry id = parser.currentSymbolTable.findSymbol(scanner.previousID, true);
-            if (id == null) {
-                // TODO runtime exception here!
-            } else {
-                // get heap address:
-                codes.add(new Code(":=", new Operand("gd", "i", "0"), new Operand("gd", "i", "4"),
-                        null));
-                // add relative address
-                codes.add(new Code("+", new Operand("gd", "i", "4"), new Operand("im", "i",
-                        Integer.toString(id.address)), new Operand("gd", "i", "4")));
-                // find the stack pointer
-                codes.add(new Code(":=sp", new Operand("gd", "i", "8"), null, null));
-                // push relative address:
-                codes.add(new Code(":=", new Operand("gd", "i", "4"), new Operand("gi", "i", "8"),
-                        null));
-                // increase stack pointer
-                codes.add(new Code("+", new Operand("gd", "i", "8"), new Operand("im", "i", "4"),
-                        new Operand("gd", "i", "8")));
-                // set stack pointer
-                codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null, null));
-                ss.add(id);
 
+        java.lang.reflect.Method method;
+        try {
+            method = this.getClass().getMethod("cg" + sem.substring(1));
+            try {
+                method.invoke(this);
+            } catch (IllegalArgumentException e) {
+                e.printStackTrace();
+                //todo fail
+            } catch (IllegalAccessException e) {
+                e.printStackTrace();
+                //todo fail
+            } catch (InvocationTargetException e) {
+                //todo fail
             }
-        } else if (sem.equals("@assign")) {
-            if (popFirst().equals(popSecond())) {
+        } catch (SecurityException e) {
+            e.printStackTrace();
+            //todo fail
+        } catch (NoSuchMethodException e) {
+            e.printStackTrace();
+            //todo fail
+        }
 
-                codes.add(new Code(":=", new Operand("gi", "i", "8"),
-                        new Operand("gi", "i", "12"), null));
-            } else {
-                // TODO ERROR or cast if possible
-            }
-        } else if (sem.equals("@assignStr")) {
-            // TODO
-        } else if (sem.equals("@addStr")) {
-            parser.structs.add(scanner.previousID);
-            // TODO
-        } else if (sem.equals("@addEnv")) {
-            // TODO
-        } else if (sem.equals("@assignArr")) {
-            // TODO
-        } else if (sem.equals("@goForward")) {
-            // TODO
-        } else if (sem.equals("@array")) {
-            // TODO
-        } else if (sem.equals("@main")) {
-            // TODO
-        } else if (sem.equals("@cmpFunc")) {
-            // TODO
-        } else if (sem.equals("@makeBool")) {
-            type = "boolean";
-        } else if (sem.equals("@makeInteger")) {
-            type = "integer";
-        } else if (sem.equals("@makeCharacter")) {
-            type = "character";
-        } else if (sem.equals("@makeString")) {
-            type = "string";
-        } else if (sem.equals("@makeReal")) {
-            type = "real";
-        } else if (sem.equals("@makeLong")) {
-            type = "long";
-        } else if (sem.equals("@make")) {
-            parser.currentSymbolTable.addSymbol(scanner.previousID, SymbolTableEntry.VAR,
-                    relativeAddress, false, type);
-            // needs TODO if we want to implement structures!
-            if (type.equals("boolean"))
-                ++relativeAddress;
-            if (type.equals("integer"))
-                relativeAddress += 4;
-            if (type.equals("string")) {
-                // TODO
-            }
-            if (type.equals("real"))
-                relativeAddress += 4;
+        return;
+    }
 
-            if (type.equals("character"))
-                relativeAddress++;
-            if (type.equals("long"))
-                relativeAddress += 8;
-            this.Generate("@push");
-        } else if (sem.equals("@addArg")) {
-            // TODO
-        } else if (sem.equals("@makeLate")) {
-            // TODO
-        } else if (sem.equals("@makeOut")) {
-            // TODO
-        } else if (sem.equals("@startBlock")) {
-            // TODO
-        } else if (sem.equals("@endBlock")) {
-            // TODO
-        } else if (sem.equals("@goto")) {
-            // TODO
-        } else if (sem.equals("@releaseStr")) {
-            // TODO
-        } else if (sem.equals("@break")) {
-            // TODO
-        } else if (sem.equals("@return")) {
-            // TODO
-        } else if (sem.equals("@assignMulti")) {
-            // TODO
-        } else if (sem.equals("@makeLabel")) {
-            // TODO
-        } else if (sem.equals("@findEnv")) {
-            // TODO
-        } else if (sem.equals("@findProperty")) {
-            // TODO
-        } else if (sem.equals("@logicalOr")) {
-            binary("||");
-        } else if (sem.equals("@logicalAnd")) {
-            binary("&&");
-        } else if (sem.equals("@bitWiseOr")) {
-            binary("|");
-        } else if (sem.equals("@bitWiseAnd")) {
-            binary("&");
-        } else if (sem.equals("@xor")) {
-            binary("^");
-        } else if (sem.equals("@equal")) {
-            binary("==");
-        } else if (sem.equals("@notEqual")) {
-            binary("!=");
-        } else if (sem.equals("@less")) {
-            binary("<");
-        } else if (sem.equals("@lessEqual")) {
-            binary("<=");
-        } else if (sem.equals("@more")) {
-            binary(">");
-        } else if (sem.equals("@moreEqual")) {
-            binary(">=");
-        } else if (sem.equals("@add")) {
-            binary("+");
-        } else if (sem.equals("@subtract")) {
-            binary("-");
-        } else if (sem.equals("@mult")) {
-            binary("*");
-        } else if (sem.equals("@divide")) {
-            binary("/");
-        } else if (sem.equals("@remainder")) {
-            binary("%");
-        } else if (sem.equals("@uMinus")) {
-            unary("u-");
-        } else if (sem.equals("@uComplement")) {
-            unary("~");
-        } else if (sem.equals("@uNot")) {
-            unary("!");
-        } else if (sem.equals("@jz")) {
-            popFirst();
-            // generate the jump Code
-            codes.add(new Code("jz", new Operand("gi", "b", "8")));
-            pushSS(getPc());
-        } else if (sem.equals("@cmpJz")) {
-            int pc = (Integer) popSS();
-            previousIf = codes.get(pc);
-            previousIf.op2 = new Operand("im", "i", Integer.toString(getPc() + 1));
-        } else if (sem.equals("@jpCmpJz")) {
-            // get pc
-//            int lastIf = (Integer) (ss.get(ss.size() - 1));
-//            ss.remove(ss.size() - 1);
-//            Code jumpCode = codes.get(lastIf);
-            previousIf.op2 = new Operand("im", "i", Integer.toString(getPc() + 2));
+    public void cgmakeBool() {
+        type = "boolean";
 
-            codes.add(new Code("jmp"));
-            pushSS(getPc());
-        } else if (sem.equals("@cmpJp")) {
-            int lastJump = (Integer) popSS();
-            Code jumpCode = codes.get(lastJump);
-            jumpCode.op1 = new Operand("im", "i", Integer.toString(codes.size()));
-        } else if (sem.equals("@whileJpCjz")) {
-            int whileLine = (Integer) popSS();
-            Code whileCode = codes.get(whileLine);
-            whileCode.op2 = new Operand("im", "i", Integer.toString(getPc() + 2));
+    }
 
-            Integer whileEvalLine = (Integer) popSS();
+    public void cgmakeInteger() {
+        type = "integer";
 
-            codes.add(new Code("jmp", new Operand("im", "i", whileEvalLine.toString())));
-        } else if (sem.equals("@pushPC")) {
-            pushSS(getPc() + 1);
-        } else if (sem.equals("@doJz")) {//it should be doJnz
-            popFirst();
-            Integer doLine = (Integer) popSS();
-            codes.add(new Code("!", new Operand("gi", "b", "8"), new Operand("gi", "b", "8")));
-            // generate the jump Code
-            codes.add(new Code("jz", new Operand("gi", "b", "8"),
-                    new Operand("im", "i", doLine.toString())));
-        } else if (sem.equals("@jpLink")) {
+    }
+
+    public void cgmakeCharacter() {
+        type = "character";
+
+    }
+
+    public void cgmakeString() {
+        type = "string";
+
+    }
+
+    public void cgmakeReal() {
+        type = "real";
+
+    }
+
+    public void cgmakeLong() {
+        type = "long";
+
+    }
+
+    public void cgmake() {
+        parser.currentSymbolTable.addSymbol(scanner.previousID, SymbolTableEntry.VAR,
+                relativeAddress, false, type);
+        // needs TODO if we want to implement structures!
+        if (type.equals("boolean"))
+            ++relativeAddress;
+        if (type.equals("integer"))
+            relativeAddress += 4;
+        if (type.equals("string")) {
             // TODO
-        } else if (sem.equals("@fillLinks")) {
-            // TODO
-        } else if (sem.equals("@pushParameter")) {
-            // TODO
-        } else if (sem.equals("@call")) {
-            // TODO
-        } else if (sem.equals("@makeConstInteger")) {
-            // find the constant if not found make an entry
-            SymbolTableEntry id = parser.currentSymbolTable.findSymbol(scanner.CV, true);
-            boolean notSet = true;
-            if (id == null) {
-                id = parser.currentSymbolTable.addSymbol(scanner.CV, SymbolTableEntry.VAR,
-                        relativeAddress, false, "integer");
-                relativeAddress += 4;
-                // set the constant
-                codes.add(new Code(":=", new Operand("gd", "i", "0"), new Operand("gd", "i", "4"),
-                        null));
-                // add relative address
-                codes.add(new Code("+", new Operand("gd", "i", "4"), new Operand("im", "i",
-                        Integer.toString(id.address)), new Operand("gd", "i", "4")));
-                // set constant value
-                codes.add(new Code(":=", new Operand("im", "i", scanner.CV), new Operand("gi",
-                        "i", "4"), null));
-                notSet = false;
-            }
-            // push the entry
+        }
+        if (type.equals("real"))
+            relativeAddress += 4;
+
+        if (type.equals("character"))
+            relativeAddress++;
+        if (type.equals("long"))
+            relativeAddress += 8;
+        this.Generate("@push");
+    }
+
+    public void cgaddArg() {
+        // TODO
+
+    }
+
+    public void cgmakeLate() {
+        // TODO
+
+    }
+
+    public void cgmakeOut() {
+        // TODO
+
+    }
+
+    public void cgstartBlock() {
+        // TODO
+    }
+
+    public void cgendBlock() {
+        // TODO
+    }
+
+    public void cggoto() {
+        // TODO
+    }
+
+    public void cgreleaseStr() {
+        // TODO
+
+    }
+
+    public void cgbreak() {
+        // TODO
+
+    }
+
+    public void cgreturn() {
+        // TODO
+
+    }
+
+    public void cgassignMulti() {
+        // TODO
+
+    }
+
+    public void cgmakeLabel() {
+        // TODO
+
+    }
+
+    public void cgfindEnv() {
+        // TODO
+
+    }
+
+    public void cgfindProperty() {
+        // TODO
+
+    }
+
+    public void cglogicalOr() {
+        binary("||");
+
+    }
+
+    public void cglogicalAnd() {
+        binary("&&");
+
+    }
+
+    public void cgbitWiseOr() {
+        binary("|");
+
+    }
+
+    public void cgbitWiseAnd() {
+        binary("&");
+
+    }
+
+    public void cgxor() {
+        binary("^");
+
+    }
+
+    public void cgequal() {
+        binary("==");
+
+    }
+
+    public void cgnotEqual() {
+        binary("!=");
+
+    }
+
+    public void cgless() {
+        binary("<");
+
+    }
+
+    public void cglessEqual() {
+        binary("<=");
+
+    }
+
+    public void cgmore() {
+        binary(">");
+
+    }
+
+    public void cgmoreEqual() {
+        binary(">=");
+
+    }
+
+    public void cgadd() {
+        binary("+");
+
+    }
+
+    public void cgsubtract() {
+        binary("-");
+
+    }
+
+    public void cgmult() {
+        binary("*");
+
+    }
+
+    public void cgdivide() {
+        binary("/");
+
+    }
+
+    public void cgremainder() {
+        binary("%");
+
+    }
+
+    public void cguMinus() {
+        unary("u-");
+
+    }
+
+    public void cguComplement() {
+        unary("~");
+    }
+
+
+    public void cguNot() {
+        unary("!");
+    }
+
+    public void cgjz() {
+        popFirst();
+        // generate the jump Code
+        codes.add(new Code("jz", new Operand("gi", "b", "8")));
+        pushSS(getPc());
+    }
+
+    public void cgcmpJz() {
+        int pc = (Integer) popSS();
+        previousIf = codes.get(pc);
+        previousIf.op2 = new Operand("im", "i", Integer.toString(getPc() + 1));
+    }
+
+    public void cgjpCmpJz() {
+        previousIf.op2 = new Operand("im", "i", Integer.toString(getPc() + 2));
+
+        codes.add(new Code("jmp"));
+        pushSS(getPc());
+
+    }
+
+    public void cgcmpJp() {
+        int lastJump = (Integer) popSS();
+        Code jumpCode = codes.get(lastJump);
+        jumpCode.op1 = new Operand("im", "i", Integer.toString(codes.size()));
+    }
+
+    public void cgwhileJpCjz() {
+        int whileLine = (Integer) popSS();
+        Code whileCode = codes.get(whileLine);
+        whileCode.op2 = new Operand("im", "i", Integer.toString(getPc() + 2));
+
+        Integer whileEvalLine = (Integer) popSS();
+
+        codes.add(new Code("jmp", new Operand("im", "i", whileEvalLine.toString())));
+
+    }
+
+
+    public void cgpushPC() {
+        pushSS(getPc() + 1);
+    }
+
+    public void cgdoJz() { // it should be doJnz
+        popFirst();
+        Integer doLine = (Integer) popSS();
+        codes.add(new Code("!", new Operand("gi", "b", "8"), new Operand("gi", "b", "8")));
+        // generate the jump Code
+        codes.add(new Code("jz", new Operand("gi", "b", "8"),
+                new Operand("im", "i", doLine.toString())));
+
+    }
+
+    public void cgjpLinks() {
+        //todo
+    }
+
+    public void cgfillLinks() {
+        //todo
+    }
+
+    public void cgpushParameter() {
+        //todo
+    }
+
+    public void cgcall() {
+        //todo
+    }
+
+    public void cgmakeConstInteger() {
+        // find the constant if not found make an entry
+        SymbolTableEntry id = parser.currentSymbolTable.findSymbol(scanner.CV, true);
+        boolean notSet = true;
+        if (id == null) {
+            id = parser.currentSymbolTable.addSymbol(scanner.CV, SymbolTableEntry.VAR,
+                    relativeAddress, false, "integer");
+            relativeAddress += 4;
+            // set the constant
+            codes.add(new Code(":=", new Operand("gd", "i", "0"), new Operand("gd", "i", "4"),
+                    null));
+            // add relative address
+            codes.add(new Code("+", new Operand("gd", "i", "4"), new Operand("im", "i",
+                    Integer.toString(id.address)), new Operand("gd", "i", "4")));
+            // set constant value
+            codes.add(new Code(":=", new Operand("im", "i", scanner.CV), new Operand("gi",
+                    "i", "4"), null));
+            notSet = false;
+        }
+        // push the entry
+        // get heap address:
+        if (notSet) {
+            codes.add(new Code(":=", new Operand("gd", "i", "0"), new Operand("gd", "i", "4"),
+                    null));
+            // add relative address
+            codes.add(new Code("+", new Operand("gd", "i", "4"), new Operand("im", "i",
+                    Integer.toString(id.address)), new Operand("gd", "i", "4")));
+        }
+        // push relative address:
+        // find the stack pointer
+        codes.add(new Code(":=sp", new Operand("gd", "i", "8"), null, null));
+        // push relative address:
+        codes.add(new Code(":=", new Operand("gd", "i", "4"), new Operand("gi", "i", "8"),
+                null));
+        // increase stack pointer
+        codes.add(new Code("+", new Operand("gd", "i", "8"), new Operand("im", "i", "4"),
+                new Operand("gd", "i", "8")));
+        // set stack pointer
+        codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null, null));
+        pushSS(id);
+    }
+
+    public void cgmakeConstCharacter() {
+        //todo
+    }
+
+    public void cgmakeConstString() {
+        //todo
+    }
+
+    public void cgmakeConstReal() {
+        //todo
+    }
+
+    public void cgpushFalse() {
+        //todo
+    }
+
+    public void cgpushTrue() {
+        //todo
+    }
+
+    public void cgmakeStruct() {
+        //todo
+    }
+
+    public void cgisVoid() {
+        //todo
+    }
+
+    public void cgwrite() {
+        // find the value of the targeted address
+        String type = popFirst();
+        if (type.equals("integer"))
+            codes.add(new Code("wi", new Operand("gi", "i", "8"), null, null));
+        if (type.equals("real"))
+            codes.add(new Code("wf", new Operand("gi", "i", "8"), null, null));
+        if (type.equals("string"))
+            codes.add(new Code("wt", new Operand("gi", "i", "8"), null, null));
+    }
+
+    public void cgpop() {
+        popFirst();
+    }
+
+    public void cgread() {
+        // find the value of the targeted address
+        String type = popFirst();
+        if (type.equals("integer"))
+            codes.add(new Code("ri", new Operand("gi", "i", "8"), null, null));
+        if (type.equals("real"))
+            codes.add(new Code("rf", new Operand("gi", "i", "8"), null, null));
+        if (type.equals("string"))
+            codes.add(new Code("rt", new Operand("gi", "i", "8"), null, null));
+    }
+
+    public void cgassignStr() {
+        //todo
+    }
+
+    public void cgaddstr() {
+        parser.structs.add(scanner.previousID);
+        //todo
+    }
+
+    public void cgaddEnv() {
+        //todo
+    }
+
+    public void cgassignArr() {
+        //todo
+    }
+
+
+    public void cggoForward() {
+        //todo
+    }
+
+
+    public void cgarray() {
+        //todo
+    }
+
+    public void cgmain() {
+        //todo
+    }
+
+    public void cgcmpFunc() {
+        //todo
+    }
+
+    public void cgassign() {
+        if (popFirst().equals(popSecond())) {
+            codes.add(new Code(":=", new Operand("gi", "i", "8"),
+                    new Operand("gi", "i", "12"), null));
+        } else {
+            // TODO ERROR or cast if possible
+        }
+    }
+
+    public void cgpush() {
+        SymbolTableEntry id = parser.currentSymbolTable.findSymbol(scanner.previousID, true);
+        if (id == null) {
+            // TODO runtime exception here!
+        } else {
             // get heap address:
-            if (notSet) {
-                codes.add(new Code(":=", new Operand("gd", "i", "0"), new Operand("gd", "i", "4"),
-                        null));
-                // add relative address
-                codes.add(new Code("+", new Operand("gd", "i", "4"), new Operand("im", "i",
-                        Integer.toString(id.address)), new Operand("gd", "i", "4")));
-            }
-            // push relative address:
+            codes.add(new Code(":=", new Operand("gd", "i", "0"), new Operand("gd", "i", "4"),
+                    null));
+            // add relative address
+            codes.add(new Code("+", new Operand("gd", "i", "4"), new Operand("im", "i",
+                    Integer.toString(id.address)), new Operand("gd", "i", "4")));
             // find the stack pointer
             codes.add(new Code(":=sp", new Operand("gd", "i", "8"), null, null));
             // push relative address:
@@ -272,47 +503,15 @@ public class CodeGenerator {
                     new Operand("gd", "i", "8")));
             // set stack pointer
             codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null, null));
-            ss.add(id);
-
-        } else if (sem.equals("@makeConstCharacter")) {
-            // TODO
-        } else if (sem.equals("@makeConstString")) {
-            // TODO
-        } else if (sem.equals("@makeConstReal")) {
-            // TODO
-        } else if (sem.equals("@pushTrue")) {
-            // TODO
-        } else if (sem.equals("@pushFalse")) {
-            // TODO
-        } else if (sem.equals("@makeStruct")) {
-            // TODO
-        } else if (sem.equals("@isVoid")) {
-            // TODO
-        } else if (sem.equals("@write")) {
-            // find the value of the targeted address
-            String type = popFirst();
-            if (type.equals("integer"))
-                codes.add(new Code("wi", new Operand("gi", "i", "8"), null, null));
-            if (type.equals("real"))
-                codes.add(new Code("wf", new Operand("gi", "i", "8"), null, null));
-            if (type.equals("string"))
-                codes.add(new Code("wt", new Operand("gi", "i", "8"), null, null));
-
-        } else if (sem.equals("@pop")) {
-            popFirst();
-        } else if (sem.equals("@read")) {
-            // find the value of the targeted address
-            String type = popFirst();
-            if (type.equals("integer"))
-                codes.add(new Code("ri", new Operand("gi", "i", "8"), null, null));
-            if (type.equals("real"))
-                codes.add(new Code("rf", new Operand("gi", "i", "8"), null, null));
-            if (type.equals("string"))
-                codes.add(new Code("rt", new Operand("gi", "i", "8"), null, null));
+            pushSS(id);
 
         }
-
     }
+
+    public void cgaDscp() {
+        //todo
+    }
+
 
     private void pushCurrent(String type) {
         // find the stack pointer
@@ -324,7 +523,7 @@ public class CodeGenerator {
                 new Operand("gd", "i", "8")));
         // set stack pointer
         codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null, null));
-        ss.add(new SymbolTableEntry("temp", 1, 0, true, type));
+        pushSS(new SymbolTableEntry("temp", 1, 0, true, type));
     }
 
     private void init() {
@@ -367,19 +566,18 @@ public class CodeGenerator {
 
     private String popFirst() {
         // checkType
-        SymbolTableEntry popped = (SymbolTableEntry) ss.get(ss.size() - 1);
-        ss.remove(ss.size() - 1);
+        SymbolTableEntry popped = (SymbolTableEntry) popSS();
         // find the stack pointer
-        codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
+        codes.add(new Code(":=sp", new Operand("gd", "i", "4")));
         // decrease stack pointer
         codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand("im", "i", "4"),
                 new Operand("gd", "i", "4")));
         // set stack pointer
-        codes.add(new Code("sp:=", new Operand("gd", "i", "4"), null, null));
+        codes.add(new Code("sp:=", new Operand("gd", "i", "4")));
         // find the stack pointer
-        codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
+        codes.add(new Code(":=sp", new Operand("gd", "i", "4")));
         // pop operand
-        codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand("gd", "i", "8"), null));
+        codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand("gd", "i", "8")));
 
         freeIfTemp(popped);
         return popped.type;
@@ -387,25 +585,23 @@ public class CodeGenerator {
 
     private void freeIfTemp(SymbolTableEntry popped) {
         if (popped.isValue)
-            codes.add(new Code("fmm", new Operand("gd", "i", "8"), new Operand("im", "i", "4"),
-                    null));
+            codes.add(new Code("fmm", new Operand("gd", "i", "8"), new Operand("im", "i", "4")));
     }
 
     private String popSecond() {
         // checkType
-        SymbolTableEntry popped = (SymbolTableEntry) ss.get(ss.size() - 1);
-        ss.remove(ss.size() - 1);
+        SymbolTableEntry popped = (SymbolTableEntry) popSS();
         // find the stack pointer
-        codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
+        codes.add(new Code(":=sp", new Operand("gd", "i", "4")));
         // decrease stack pointer
         codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand("im", "i", "4"),
                 new Operand("gd", "i", "4")));
         // set stack pointer
-        codes.add(new Code("sp:=", new Operand("gd", "i", "4"), null, null));
+        codes.add(new Code("sp:=", new Operand("gd", "i", "4")));
         // find the stack pointer
-        codes.add(new Code(":=sp", new Operand("gd", "i", "4"), null, null));
+        codes.add(new Code(":=sp", new Operand("gd", "i", "4")));
         // pop first operand
-        codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand("gd", "i", "12"), null));
+        codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand("gd", "i", "12")));
         // freeIfTemp();
         freeIfTemp2(popped);
         return popped.type;
@@ -413,14 +609,12 @@ public class CodeGenerator {
 
     private void freeIfTemp2(SymbolTableEntry popped) {
         if (popped.isValue)
-            codes.add(new Code("fmm", new Operand("gd", "i", "12"), new Operand("im", "i", "4"),
-                    null));
+            codes.add(new Code("fmm", new Operand("gd", "i", "12"), new Operand("im", "i", "4")));
     }
 
     public void FinishCode() // You may need this
     {
-        codes.add(new Code("fmm", new Operand("gd", "i", "0"), new Operand("im", "i", "1024"),
-                null));
+        codes.add(new Code("fmm", new Operand("gd", "i", "0"), new Operand("im", "i", "1024")));
     }
 
     public void WriteOutput(String outputName) {
