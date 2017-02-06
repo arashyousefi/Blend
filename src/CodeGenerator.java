@@ -23,6 +23,18 @@ public class CodeGenerator {
         init();
     }
 
+    Integer getPc() {
+        return codes.size() - 1;
+    }
+
+    Object popSS() {
+        return ss.remove(ss.size() - 1);
+    }
+
+    void pushSS(Object a) {
+        ss.add(a);
+    }
+
     public void Generate(String sem) {
         System.out.println(sem); // Just for debug
 
@@ -178,29 +190,40 @@ public class CodeGenerator {
             popFirst();
             // generate the jump Code
             codes.add(new Code("jz", new Operand("gi", "b", "8")));
-            // push pc
-            ss.add(codes.size() - 1);
+            pushSS(getPc());
         } else if (sem.equals("@cmpJz")) {
-            // get pc
-            int pc = (Integer) (ss.get(ss.size() - 1));
-            ss.remove(ss.size() - 1);
+            int pc = (Integer) popSS();
             previousIf = codes.get(pc);
-            previousIf.op2 = new Operand("im", "i", Integer.toString(codes.size()));
+            previousIf.op2 = new Operand("im", "i", Integer.toString(getPc() + 1));
         } else if (sem.equals("@jpCmpJz")) {
             // get pc
 //            int lastIf = (Integer) (ss.get(ss.size() - 1));
 //            ss.remove(ss.size() - 1);
 //            Code jumpCode = codes.get(lastIf);
-            previousIf.op2 = new Operand("im", "i", Integer.toString(codes.size() + 1));
+            previousIf.op2 = new Operand("im", "i", Integer.toString(getPc() + 2));
 
             codes.add(new Code("jmp"));
-            ss.add(codes.size() - 1);
+            pushSS(getPc());
         } else if (sem.equals("@cmpJp")) {
-
-            int lastJump = (Integer) (ss.get(ss.size() - 1));
-            ss.remove(ss.size() - 1);
+            int lastJump = (Integer) popSS();
             Code jumpCode = codes.get(lastJump);
             jumpCode.op1 = new Operand("im", "i", Integer.toString(codes.size()));
+        } else if (sem.equals("@whileJpCjz")) {
+            int whileLine = (Integer) popSS();
+            Code whileCode = codes.get(whileLine);
+            whileCode.op2 = new Operand("im", "i", Integer.toString(getPc() + 2));
+
+            Integer whileEvalLine = (Integer) popSS();
+
+            codes.add(new Code("jmp", new Operand("im", "i", whileEvalLine.toString())));
+        } else if (sem.equals("@pushPC")) {
+            pushSS(getPc() + 1);
+        } else if (sem.equals("@doJz")) {
+            popFirst();
+            Integer doLine = (Integer) popSS();
+            // generate the jump Code
+            codes.add(new Code("jz", new Operand("gi", "b", "8"),
+                    new Operand("im", "i", doLine.toString())));
         } else if (sem.equals("@jpLink")) {
             // TODO
         } else if (sem.equals("@fillLinks")) {

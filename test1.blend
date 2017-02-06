@@ -3,13 +3,9 @@ function (integer) main()
 	integer a := 4;
 	integer b := 2;
 	integer c := 1;
-	if(a = b*c){
-		write(a);
-	}
-	if( -1 = (2 - 1)){
-	    write(3);
-	}else{
-	    write(4);
+	while(a > 1){
+	    write(a);
+	    a := a-1;
 	}
 	write(-1);
 }
