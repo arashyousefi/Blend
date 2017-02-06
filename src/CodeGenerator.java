@@ -15,6 +15,7 @@ public class CodeGenerator {
     ArrayList<Code> codes = new ArrayList<Code>();
     int relativeAddress = 0;
     String type;
+    Code previousIf;
 
     public CodeGenerator(Scanner scanner, Parser parser) {
         this.scanner = scanner;
@@ -183,14 +184,14 @@ public class CodeGenerator {
             // get pc
             int pc = (Integer) (ss.get(ss.size() - 1));
             ss.remove(ss.size() - 1);
-            Code jumpCode = codes.get(pc);
-            jumpCode.op2 = new Operand("im", "i", Integer.toString(codes.size()));
+            previousIf = codes.get(pc);
+            previousIf.op2 = new Operand("im", "i", Integer.toString(codes.size()));
         } else if (sem.equals("@jpCmpJz")) {
             // get pc
-            int lastIf = (Integer) (ss.get(ss.size() - 1));
-            ss.remove(ss.size() - 1);
-            Code jumpCode = codes.get(lastIf);
-            jumpCode.op2 = new Operand("im", "i", Integer.toString(codes.size() + 1));
+//            int lastIf = (Integer) (ss.get(ss.size() - 1));
+//            ss.remove(ss.size() - 1);
+//            Code jumpCode = codes.get(lastIf);
+            previousIf.op2 = new Operand("im", "i", Integer.toString(codes.size() + 1));
 
             codes.add(new Code("jp"));
             ss.add(codes.size() - 1);

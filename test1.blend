@@ -5,8 +5,6 @@ function (integer) main()
 	integer c := 1;
 	if(a = b*c){
 		write(a);
-	}else{
-	    write(c);
 	}
 	write(b);
 }
