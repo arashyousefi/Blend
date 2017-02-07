@@ -1,3 +1,4 @@
+import symbolTableEntry.LabelSymbolTableEntry;
 import symbolTableEntry.SymbolTableEntry;
 
 import java.io.File;
@@ -37,7 +38,7 @@ public class CodeGenerator {
     }
 
     public void Generate(String sem) {
-        System.out.println(sem); // Just for debug
+//        System.err.println(sem); // Just for debug
         if (sem.equals("NoSem"))
             return;
 
@@ -96,6 +97,10 @@ public class CodeGenerator {
 
     }
 
+    public void cgaddReturn() {
+        //todo
+    }
+
     public void cgmake() {
         parser.currentSymbolTable.addSymbol(scanner.previousID, SymbolTableEntry.VAR,
                 relativeAddress, false, type);
@@ -140,10 +145,6 @@ public class CodeGenerator {
         // TODO
     }
 
-    public void cggoto() {
-        // TODO
-    }
-
     public void cgreleaseStr() {
         // TODO
 
@@ -164,9 +165,48 @@ public class CodeGenerator {
 
     }
 
-    public void cgmakeLabel() {
-        // TODO
+    public void cggoto() {
+        Code gotoCode = new Code("jmp");
+        codes.add(gotoCode);
+        String id = scanner.previousID;
+        SymbolTableEntry symbolTableEntry = parser.currentSymbolTable.findSymbol(id, false);
+        if (symbolTableEntry != null) {// label was created before
+            LabelSymbolTableEntry labelSymbolTableEntry = (LabelSymbolTableEntry) symbolTableEntry;
+            if (labelSymbolTableEntry.address == -1) { // just add it to the references
+                System.err.println("goto without address " + id);
+                labelSymbolTableEntry.references.add(getPc());
+            } else { // we know the address
+                System.err.println("goto with address " + id);
+                gotoCode.op1 = new Operand("im", "i", labelSymbolTableEntry.address.toString());
+            }
+        } else { // we have to create it now
+            System.err.println("new goto without address " + id);
+            LabelSymbolTableEntry labelSymbolTableEntry = new LabelSymbolTableEntry(id);
+            labelSymbolTableEntry.references.add(getPc());
+            parser.currentSymbolTable.addSymbol(labelSymbolTableEntry);
+        }
+    }
 
+    public void cgmakeLabel() {
+        String id = scanner.previousID;
+        SymbolTableEntry symbolTableEntry = parser.currentSymbolTable.findSymbol(id, false);
+        if (symbolTableEntry == null) { // just create, no need to do anything
+            System.err.println("new label " + id);
+            LabelSymbolTableEntry labelSymbolTableEntry = new LabelSymbolTableEntry(id);
+            labelSymbolTableEntry.address = getPc() + 1;
+            parser.currentSymbolTable.addSymbol(labelSymbolTableEntry);
+
+        } else {
+            System.err.println("label " + id);
+            LabelSymbolTableEntry labelSymbolTableEntry = (LabelSymbolTableEntry) symbolTableEntry;
+            labelSymbolTableEntry.address = getPc() + 1;
+            for (int i : labelSymbolTableEntry.references) {
+                System.err.println("fixed code " + id + " " + i);
+                codes.get(i).op1 = new Operand("im", "i",
+                        labelSymbolTableEntry.address.toString());
+            }
+            labelSymbolTableEntry.references.clear();
+        }
     }
 
     public void cgfindEnv() {
