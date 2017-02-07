@@ -1,16 +1,11 @@
 function (integer) main()
 {
 	integer a := 4;
-	integer b := 2;
-	integer c := 1;
-	while(a > 1){
-	    write(a);
-	    a := a-1;
+	case (a) of 
+	4 : {
+	write(4);
 	}
-	do{
-	    write(a);
-	    a := a+1;
-	}while(a < 5)
-	write(a);
-	write(-1);
+	5 : {
+	write(5);
+	}
 }

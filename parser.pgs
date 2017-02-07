@@ -657,8 +657,8 @@
         "isFinal": false
       },
       {
-        "x": 707.0,
-        "y": 109.0,
+        "x": 733.0,
+        "y": 107.0,
         "id": 39,
         "isFinal": true
       },
@@ -1225,20 +1225,20 @@
         "isFinal": false
       },
       {
-        "x": 235.0,
-        "y": 704.0,
+        "x": 250.0,
+        "y": 700.0,
         "id": 70,
         "isFinal": false
       },
       {
-        "x": 232.0,
-        "y": 757.0,
+        "x": 260.0,
+        "y": 753.0,
         "id": 71,
         "isFinal": false
       },
       {
-        "x": 209.0,
-        "y": 828.0,
+        "x": 256.0,
+        "y": 822.0,
         "id": 72,
         "isFinal": false
       },
@@ -3473,8 +3473,8 @@
         "end": 166,
         "token": ")",
         "func": "call",
-        "anchorX": 184.0,
-        "anchorY": 29.0,
+        "anchorX": 192.0,
+        "anchorY": 40.0,
         "isGraph": false,
         "isGlobal": false
       },
@@ -3581,8 +3581,8 @@
         "end": 172,
         "token": "BLOCK",
         "func": "whileJpCjz",
-        "anchorX": 490.0,
-        "anchorY": 102.0,
+        "anchorX": 495.0,
+        "anchorY": 66.0,
         "isGraph": true,
         "isGlobal": false
       }
@@ -3827,14 +3827,14 @@
         "isFinal": false
       },
       {
-        "x": 603.0,
-        "y": 118.0,
+        "x": 660.0,
+        "y": 114.0,
         "id": 191,
         "isFinal": false
       },
       {
-        "x": 607.0,
-        "y": 216.0,
+        "x": 665.0,
+        "y": 213.0,
         "id": 192,
         "isFinal": true
       }
@@ -3854,9 +3854,9 @@
         "start": 187,
         "end": 188,
         "token": "of",
-        "func": "",
-        "anchorX": 207.5,
-        "anchorY": 114.5,
+        "func": "caseJump",
+        "anchorX": 215.5,
+        "anchorY": 159.5,
         "isGraph": false,
         "isGlobal": false
       },
@@ -3864,9 +3864,9 @@
         "start": 188,
         "end": 189,
         "token": "CONST",
-        "func": "",
-        "anchorX": 312.5,
-        "anchorY": 84.0,
+        "func": "pushFirstAddr",
+        "anchorX": 311.5,
+        "anchorY": 74.0,
         "isGraph": true,
         "isGlobal": false
       },
@@ -3885,8 +3885,8 @@
         "end": 191,
         "token": "BLOCK",
         "func": "jpLink",
-        "anchorX": 519.0,
-        "anchorY": 99.5,
+        "anchorX": 526.0,
+        "anchorY": 114.5,
         "isGraph": true,
         "isGlobal": false
       },
@@ -3895,18 +3895,18 @@
         "end": 192,
         "token": "endcase",
         "func": "fillLinks",
-        "anchorX": 605.0,
-        "anchorY": 167.0,
+        "anchorX": 665.0,
+        "anchorY": 166.0,
         "isGraph": false,
         "isGlobal": false
       },
       {
         "start": 191,
-        "end": 190,
+        "end": 189,
         "token": "CONST",
-        "func": "",
-        "anchorX": 526.5,
-        "anchorY": 60.0,
+        "func": "pushAddr",
+        "anchorX": 467.5,
+        "anchorY": 63.5,
         "isGraph": true,
         "isGlobal": false
       }
