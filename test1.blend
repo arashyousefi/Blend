@@ -1,11 +1,25 @@
 function (integer) main()
 {
-	integer a := 4;
+	integer a := 5;
+	integer b := 3;
 	case (a) of 
-	4 : {
-	write(4);
-	}
-	5 : {
-	write(5);
-	}
+		7:{
+			write(8);
+		}
+		4 : {
+			write(4);
+		}
+
+		5 : {
+			case(b) of 
+				6:{
+					write(6);
+				} 
+				3:{
+					write(3);
+				}
+			endcase
+			write(5);
+		}
+	endcase
 }

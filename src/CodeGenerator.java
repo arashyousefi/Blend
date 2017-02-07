@@ -9,7 +9,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 
 public class CodeGenerator {
-<<<<<<< HEAD
 	Scanner scanner; // This was my way of informing CG about Constant Values
 	// detected by Scanner, you can do whatever you like
 
@@ -42,7 +41,7 @@ public class CodeGenerator {
 	}
 
 	public void Generate(String sem) {
-		System.out.println(sem); // Just for debug
+		// System.err.println(sem); // Just for debug
 		if (sem.equals("NoSem"))
 			return;
 
@@ -67,63 +66,6 @@ public class CodeGenerator {
 			e.printStackTrace();
 			// todo fail
 		}
-=======
-    Scanner scanner; // This was my way of informing CG about Constant Values
-    // detected by Scanner, you can do whatever you like
-
-    // Define any variables needed for code generation
-    Parser parser;
-    ArrayList<Object> ss = new ArrayList<>();
-    ArrayList<Code> codes = new ArrayList<Code>();
-    int relativeAddress = 0;
-    String type;
-    Code previousIf;
-
-    public CodeGenerator(Scanner scanner, Parser parser) {
-        this.scanner = scanner;
-        this.parser = parser;
-        init();
-    }
-
-    Integer getPc() {
-        return codes.size() - 1;
-    }
-
-    Object popSS() {
-        return ss.remove(ss.size() - 1);
-    }
-
-    void pushSS(Object a) {
-        ss.add(a);
-    }
-
-    public void Generate(String sem) {
-//        System.err.println(sem); // Just for debug
-        if (sem.equals("NoSem"))
-            return;
-
-        java.lang.reflect.Method method;
-        try {
-            method = this.getClass().getMethod("cg" + sem.substring(1));
-            try {
-                method.invoke(this);
-            } catch (IllegalArgumentException e) {
-                e.printStackTrace();
-                //todo fail
-            } catch (IllegalAccessException e) {
-                e.printStackTrace();
-                //todo fail
-            } catch (InvocationTargetException e) {
-                //todo fail
-            }
-        } catch (SecurityException e) {
-            e.printStackTrace();
-            //todo fail
-        } catch (NoSuchMethodException e) {
-            e.printStackTrace();
-            //todo fail
-        }
->>>>>>> cb97787b7f4fea6aa0ea94659f30ca8f0092fcca
 
 		return;
 	}
@@ -158,7 +100,10 @@ public class CodeGenerator {
 
 	}
 
-<<<<<<< HEAD
+	public void cgaddReturn() {
+		// todo
+	}
+
 	public void cgmake() {
 		parser.currentSymbolTable.addSymbol(scanner.previousID, SymbolTableEntry.VAR,
 				relativeAddress, false, type);
@@ -172,25 +117,6 @@ public class CodeGenerator {
 		}
 		if (type.equals("real"))
 			relativeAddress += 4;
-=======
-    public void cgaddReturn() {
-        //todo
-    }
-
-    public void cgmake() {
-        parser.currentSymbolTable.addSymbol(scanner.previousID, SymbolTableEntry.VAR,
-                relativeAddress, false, type);
-        // needs TODO if we want to implement structures!
-        if (type.equals("boolean"))
-            ++relativeAddress;
-        if (type.equals("integer"))
-            relativeAddress += 4;
-        if (type.equals("string")) {
-            // TODO
-        }
-        if (type.equals("real"))
-            relativeAddress += 4;
->>>>>>> cb97787b7f4fea6aa0ea94659f30ca8f0092fcca
 
 		if (type.equals("character"))
 			relativeAddress++;
@@ -222,17 +148,8 @@ public class CodeGenerator {
 		// TODO
 	}
 
-<<<<<<< HEAD
-	public void cggoto() {
-		// TODO
-	}
-
 	public void cgreleaseStr() {
 		// TODO
-=======
-    public void cgreleaseStr() {
-        // TODO
->>>>>>> cb97787b7f4fea6aa0ea94659f30ca8f0092fcca
 
 	}
 
@@ -251,56 +168,48 @@ public class CodeGenerator {
 
 	}
 
-<<<<<<< HEAD
-	public void cgmakeLabel() {
-		// TODO
-
+	public void cggoto() {
+		Code gotoCode = new Code("jmp");
+		codes.add(gotoCode);
+		String id = scanner.previousID;
+		SymbolTableEntry symbolTableEntry = parser.currentSymbolTable.findSymbol(id, false);
+		if (symbolTableEntry != null) {// label was created before
+			LabelSymbolTableEntry labelSymbolTableEntry = (LabelSymbolTableEntry) symbolTableEntry;
+			if (labelSymbolTableEntry.address == -1) { // just add it to the references
+				// System.err.println("goto without address " + id);
+				labelSymbolTableEntry.references.add(getPc());
+			} else { // we know the address
+				// System.err.println("goto with address " + id);
+				gotoCode.op1 = new Operand("im", "i", labelSymbolTableEntry.address.toString());
+			}
+		} else { // we have to create it now
+			// System.err.println("new goto without address " + id);
+			LabelSymbolTableEntry labelSymbolTableEntry = new LabelSymbolTableEntry(id);
+			labelSymbolTableEntry.references.add(getPc());
+			parser.currentSymbolTable.addSymbol(labelSymbolTableEntry);
+		}
 	}
-=======
-    public void cggoto() {
-        Code gotoCode = new Code("jmp");
-        codes.add(gotoCode);
-        String id = scanner.previousID;
-        SymbolTableEntry symbolTableEntry = parser.currentSymbolTable.findSymbol(id, false);
-        if (symbolTableEntry != null) {// label was created before
-            LabelSymbolTableEntry labelSymbolTableEntry = (LabelSymbolTableEntry) symbolTableEntry;
-            if (labelSymbolTableEntry.address == -1) { // just add it to the references
-//                System.err.println("goto without address " + id);
-                labelSymbolTableEntry.references.add(getPc());
-            } else { // we know the address
-//                System.err.println("goto with address " + id);
-                gotoCode.op1 = new Operand("im", "i", labelSymbolTableEntry.address.toString());
-            }
-        } else { // we have to create it now
-//            System.err.println("new goto without address " + id);
-            LabelSymbolTableEntry labelSymbolTableEntry = new LabelSymbolTableEntry(id);
-            labelSymbolTableEntry.references.add(getPc());
-            parser.currentSymbolTable.addSymbol(labelSymbolTableEntry);
-        }
-    }
 
-    public void cgmakeLabel() {
-        String id = scanner.previousID;
-        SymbolTableEntry symbolTableEntry = parser.currentSymbolTable.findSymbol(id, false);
-        if (symbolTableEntry == null) { // just create, no need to do anything
-//            System.err.println("new label " + id);
-            LabelSymbolTableEntry labelSymbolTableEntry = new LabelSymbolTableEntry(id);
-            labelSymbolTableEntry.address = getPc() + 1;
-            parser.currentSymbolTable.addSymbol(labelSymbolTableEntry);
+	public void cgmakeLabel() {
+		String id = scanner.previousID;
+		SymbolTableEntry symbolTableEntry = parser.currentSymbolTable.findSymbol(id, false);
+		if (symbolTableEntry == null) { // just create, no need to do anything
+			// System.err.println("new label " + id);
+			LabelSymbolTableEntry labelSymbolTableEntry = new LabelSymbolTableEntry(id);
+			labelSymbolTableEntry.address = getPc() + 1;
+			parser.currentSymbolTable.addSymbol(labelSymbolTableEntry);
 
-        } else {
-//            System.err.println("label " + id);
-            LabelSymbolTableEntry labelSymbolTableEntry = (LabelSymbolTableEntry) symbolTableEntry;
-            labelSymbolTableEntry.address = getPc() + 1;
-            for (int i : labelSymbolTableEntry.references) {
-//                System.err.println("fixed code " + id + " " + i);
-                codes.get(i).op1 = new Operand("im", "i",
-                        labelSymbolTableEntry.address.toString());
-            }
-            labelSymbolTableEntry.references.clear();
-        }
-    }
->>>>>>> cb97787b7f4fea6aa0ea94659f30ca8f0092fcca
+		} else {
+			// System.err.println("label " + id);
+			LabelSymbolTableEntry labelSymbolTableEntry = (LabelSymbolTableEntry) symbolTableEntry;
+			labelSymbolTableEntry.address = getPc() + 1;
+			for (int i : labelSymbolTableEntry.references) {
+				// System.err.println("fixed code " + id + " " + i);
+				codes.get(i).op1 = new Operand("im", "i", labelSymbolTableEntry.address.toString());
+			}
+			labelSymbolTableEntry.references.clear();
+		}
+	}
 
 	public void cgfindEnv() {
 		// TODO
@@ -459,16 +368,20 @@ public class CodeGenerator {
 
 	public void cgcaseJump() {
 		popFirst();
-		codes.add(new Code("-", new Operand("im", "i", "8"), null, new Operand("im", "i", "8")));
-		cgpushPC();
-		codes.add(new Code("jmp", new Operand("im", "i", "8")));
+		codes.add(new Code("-", new Operand("gi", "i", "8"), null, new Operand("gd", "i", "12")));
+		pushSS(getPc());
+		codes.add(new Code("+", new Operand("gd", "i", "12"), null, new Operand("gd", "i", "12")));
+		pushSS(getPc());
+		codes.add(new Code("jmp", new Operand("gd", "i", "12")));
 	}
 
 	public void cgpushFirstAddr() {
+		cgpop();
 		firstLinks.add(new CaseLink(getPc() + 1, Integer.parseInt(scanner.CV)));
 	}
 
 	public void cgpushAddr() {
+		cgpop();
 		CaseLink last = firstLinks.get(firstLinks.size() - 1);
 		while (last.next != null)
 			last = last.next;
@@ -476,31 +389,39 @@ public class CodeGenerator {
 
 	}
 
-	public void cgjpLinks() {
+	public void cgjpLink() {
 		codes.add(new Code("jmp"));
 		pushSS(getPc());
 	}
 
 	public void cgfillLinks() {
 		ArrayList<CaseLink> lastCase = new ArrayList<CaseLink>();
-		CaseLink first = firstLinks.get(firstLinks.size() - 1);
+		CaseLink first = firstLinks.remove(firstLinks.size() - 1);
 		while (first != null) {
 			lastCase.add(first);
 			first = first.next;
 		}
 		CaseLink max = Collections.max(lastCase);
 		CaseLink min = Collections.min(lastCase);
-		Integer out = getPc() + max.value - min.value;
+		Integer out = getPc() + max.value - min.value + 2;
 		Integer start = getPc() + 1;
 		for (int i = min.value; i <= max.value; ++i) {
 			codes.add(new Code("jmp", new Operand("im", "i", out.toString())));
 		}
-		for (CaseLink cl : lastCase) {
+		for (CaseLink cl : lastCase)
+			codes.get(start + cl.value - min.value).op1 = new Operand("im", "i",
+					cl.address.toString());
+		for (int i = 0; i < lastCase.size(); ++i) {
 			Integer addr = (Integer) popSS();
-			codes.get(start + cl.value).op1 = new Operand("im", "i", addr.toString());
+			codes.get(addr).op2 = new Operand("im", "i", out.toString());
 		}
+		Integer plusAddr = (Integer) popSS();
+		codes.get(plusAddr).op2 = new Operand("im", "i", start.toString());
+
 		Integer minusAddr = (Integer) popSS();
-		codes.get(minusAddr).op2 = new Operand("im", "i", start.toString());
+
+		codes.get(minusAddr).op2 = new Operand("im", "i", min.value.toString());
+
 	}
 
 	public void cgpushParameter() {
@@ -592,7 +513,18 @@ public class CodeGenerator {
 	}
 
 	public void cgpop() {
-		popFirst();
+		// checkType
+		SymbolTableEntry popped = (SymbolTableEntry) popSS();
+		// find the stack pointer
+		codes.add(new Code(":=sp", new Operand("gd", "i", "4")));
+		// decrease stack pointer
+		codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand("im", "i", "4"),
+				new Operand("gd", "i", "4")));
+		// set stack pointer
+		codes.add(new Code("sp:=", new Operand("gd", "i", "4")));
+		// find the stack pointer
+
+		freeIfTemp(popped);
 	}
 
 	public void cgread() {

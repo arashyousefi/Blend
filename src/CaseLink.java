@@ -1,6 +1,6 @@
 
 public class CaseLink implements Comparable<CaseLink> {
-	public int address, value;
+	public Integer address, value;
 	public CaseLink next;
 
 	public CaseLink(int address, int value) {
