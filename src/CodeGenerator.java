@@ -173,14 +173,14 @@ public class CodeGenerator {
         if (symbolTableEntry != null) {// label was created before
             LabelSymbolTableEntry labelSymbolTableEntry = (LabelSymbolTableEntry) symbolTableEntry;
             if (labelSymbolTableEntry.address == -1) { // just add it to the references
-                System.err.println("goto without address " + id);
+//                System.err.println("goto without address " + id);
                 labelSymbolTableEntry.references.add(getPc());
             } else { // we know the address
-                System.err.println("goto with address " + id);
+//                System.err.println("goto with address " + id);
                 gotoCode.op1 = new Operand("im", "i", labelSymbolTableEntry.address.toString());
             }
         } else { // we have to create it now
-            System.err.println("new goto without address " + id);
+//            System.err.println("new goto without address " + id);
             LabelSymbolTableEntry labelSymbolTableEntry = new LabelSymbolTableEntry(id);
             labelSymbolTableEntry.references.add(getPc());
             parser.currentSymbolTable.addSymbol(labelSymbolTableEntry);
@@ -191,17 +191,17 @@ public class CodeGenerator {
         String id = scanner.previousID;
         SymbolTableEntry symbolTableEntry = parser.currentSymbolTable.findSymbol(id, false);
         if (symbolTableEntry == null) { // just create, no need to do anything
-            System.err.println("new label " + id);
+//            System.err.println("new label " + id);
             LabelSymbolTableEntry labelSymbolTableEntry = new LabelSymbolTableEntry(id);
             labelSymbolTableEntry.address = getPc() + 1;
             parser.currentSymbolTable.addSymbol(labelSymbolTableEntry);
 
         } else {
-            System.err.println("label " + id);
+//            System.err.println("label " + id);
             LabelSymbolTableEntry labelSymbolTableEntry = (LabelSymbolTableEntry) symbolTableEntry;
             labelSymbolTableEntry.address = getPc() + 1;
             for (int i : labelSymbolTableEntry.references) {
-                System.err.println("fixed code " + id + " " + i);
+//                System.err.println("fixed code " + id + " " + i);
                 codes.get(i).op1 = new Operand("im", "i",
                         labelSymbolTableEntry.address.toString());
             }
