@@ -23,13 +23,14 @@ public class CodeGenerator {
     String type;
     Code previousIf;
 
-	ArrayList<CaseLink> firstLinks = new ArrayList<CaseLink>();
+    ArrayList<CaseLink> firstLinks = new ArrayList<>();
+    ArrayList<LoopLink> loopLinks = new ArrayList<>();
 
-	public CodeGenerator(Scanner scanner, Parser parser) {
-		this.scanner = scanner;
-		this.parser = parser;
-		init();
-	}
+    public CodeGenerator(Scanner scanner, Parser parser) {
+        this.scanner = scanner;
+        this.parser = parser;
+        init();
+    }
 
     private void makeCode(String upcode, String op1, String op2, String op3) {
         codes.add(new Code(upcode, new Operand(op1), new Operand(op2), new Operand(op3)));
@@ -172,8 +173,11 @@ public class CodeGenerator {
     }
 
     public void cgbreak() {
-        // TODO
-
+        if (loopLinks.isEmpty()) {
+            throw new RuntimeException("break outside of loop");
+        }
+        makeCode("jmp");
+        loopLinks.get(loopLinks.size() - 1).breaks.add(getPc());
     }
 
     public void cgreturn() {
@@ -329,9 +333,9 @@ public class CodeGenerator {
         unary("~");
     }
 
-	public void cguNot() {
-		unary("!");
-	}
+    public void cguNot() {
+        unary("!");
+    }
 
     public void cgjz() {
         popFirst();
@@ -360,6 +364,14 @@ public class CodeGenerator {
         jumpCode.op1 = new Operand("im", "i", Integer.toString(codes.size()));
     }
 
+    private void fillBreaks() {
+        LoopLink loopLink = loopLinks.remove(loopLinks.size() - 1);
+        int end = getPc() + 1;
+        for (Integer i : loopLink.breaks) {
+            codes.get(i).op1 = new Operand("im_i_" + end);
+        }
+    }
+
     public void cgwhileJpCjz() {
         int whileLine = (Integer) popSS();
         Code whileCode = codes.get(whileLine);
@@ -368,12 +380,17 @@ public class CodeGenerator {
         Integer whileEvalLine = (Integer) popSS();
 
         codes.add(new Code("jmp", new Operand("im", "i", whileEvalLine.toString())));
-
+        fillBreaks();
     }
 
-	public void cgpushPC() {
-		pushSS(getPc() + 1);
-	}
+    public void cgpushPCAddLink() {
+        pushSS(getPc() + 1);
+        loopLinks.add(new LoopLink(getPc() + 1));
+    }
+
+    public void cgpushPC() {
+        pushSS(getPc() + 1);
+    }
 
     public void cgdoJz() { // it should be doJnz
         popFirst();
@@ -384,66 +401,67 @@ public class CodeGenerator {
 //        codes.add(new Code("jz", new Operand("gi", "b", "8"),
 //                new Operand("im", "i", doLine.toString())));
         makeCode("jz", "gi_b_8", "im_i_" + doLine.toString());
+        fillBreaks();
     }
 
-	public void cgcaseJump() {
-		popFirst();
-		codes.add(new Code("-", new Operand("gi", "i", "8"), null, new Operand("gd", "i", "12")));
-		pushSS(getPc());
-		codes.add(new Code("+", new Operand("gd", "i", "12"), null, new Operand("gd", "i", "12")));
-		pushSS(getPc());
-		codes.add(new Code("jmp", new Operand("gd", "i", "12")));
-	}
+    public void cgcaseJump() {
+        popFirst();
+        codes.add(new Code("-", new Operand("gi", "i", "8"), null, new Operand("gd", "i", "12")));
+        pushSS(getPc());
+        codes.add(new Code("+", new Operand("gd", "i", "12"), null, new Operand("gd", "i", "12")));
+        pushSS(getPc());
+        codes.add(new Code("jmp", new Operand("gd", "i", "12")));
+    }
 
-	public void cgpushFirstAddr() {
-		cgpop();
+    public void cgpushFirstAddr() {
+        cgpop();
 
-		firstLinks.add(new CaseLink(getPc() + 1, Integer.parseInt(scanner.CV)));
-	}
+        firstLinks.add(new CaseLink(getPc() + 1, Integer.parseInt(scanner.CV)));
+    }
 
-	public void cgpushAddr() {
-		cgpop();
-		CaseLink last = firstLinks.get(firstLinks.size() - 1);
-		while (last.next != null)
-			last = last.next;
-		last.next = new CaseLink(getPc() + 1, Integer.parseInt(scanner.CV));
+    public void cgpushAddr() {
+        cgpop();
+        CaseLink last = firstLinks.get(firstLinks.size() - 1);
+        while (last.next != null)
+            last = last.next;
+        last.next = new CaseLink(getPc() + 1, Integer.parseInt(scanner.CV));
 
-	}
+    }
 
-	public void cgjpLink() {
-		codes.add(new Code("jmp"));
-		pushSS(getPc());
-	}
+    public void cgjpLink() {
+        codes.add(new Code("jmp"));
+        pushSS(getPc());
+    }
 
-	public void cgfillLinks() {
-		ArrayList<CaseLink> lastCase = new ArrayList<CaseLink>();
-		CaseLink first = firstLinks.remove(firstLinks.size() - 1);
-		while (first != null) {
-			lastCase.add(first);
-			first = first.next;
-		}
-		CaseLink max = Collections.max(lastCase);
-		CaseLink min = Collections.min(lastCase);
-		Integer out = getPc() + max.value - min.value + 2;
-		Integer start = getPc() + 1;
-		for (int i = min.value; i <= max.value; ++i) {
-			codes.add(new Code("jmp", new Operand("im", "i", out.toString())));
-		}
-		for (CaseLink cl : lastCase)
-			codes.get(start + cl.value - min.value).op1 = new Operand("im", "i",
-					cl.address.toString());
-		for (int i = 0; i < lastCase.size(); ++i) {
-			Integer addr = (Integer) popSS();
-			codes.get(addr).op2 = new Operand("im", "i", out.toString());
-		}
-		Integer plusAddr = (Integer) popSS();
-		codes.get(plusAddr).op2 = new Operand("im", "i", start.toString());
+    public void cgfillLinks() {
+        ArrayList<CaseLink> lastCase = new ArrayList<CaseLink>();
+        CaseLink first = firstLinks.remove(firstLinks.size() - 1);
+        while (first != null) {
+            lastCase.add(first);
+            first = first.next;
+        }
+        CaseLink max = Collections.max(lastCase);
+        CaseLink min = Collections.min(lastCase);
+        Integer out = getPc() + max.value - min.value + 2;
+        Integer start = getPc() + 1;
+        for (int i = min.value; i <= max.value; ++i) {
+            codes.add(new Code("jmp", new Operand("im", "i", out.toString())));
+        }
+        for (CaseLink cl : lastCase)
+            codes.get(start + cl.value - min.value).op1 = new Operand("im", "i",
+                    cl.address.toString());
+        for (int i = 0; i < lastCase.size(); ++i) {
+            Integer addr = (Integer) popSS();
+            codes.get(addr).op2 = new Operand("im", "i", out.toString());
+        }
+        Integer plusAddr = (Integer) popSS();
+        codes.get(plusAddr).op2 = new Operand("im", "i", start.toString());
 
-		Integer minusAddr = (Integer) popSS();
+        Integer minusAddr = (Integer) popSS();
 
-		codes.get(minusAddr).op2 = new Operand("im", "i", min.value.toString());
+        codes.get(minusAddr).op2 = new Operand("im", "i", min.value.toString());
 
-	}
+    }
 
     public void cgpushParameter() {
         //todo
@@ -534,20 +552,20 @@ public class CodeGenerator {
             codes.add(new Code("wt", new Operand("gi", "i", "8"), null, null));
     }
 
-	public void cgpop() {
-		// checkType
-		SymbolTableEntry popped = (SymbolTableEntry) popSS();
-		// find the stack pointer
-		codes.add(new Code(":=sp", new Operand("gd", "i", "4")));
-		// decrease stack pointer
-		codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand("im", "i", "4"),
-				new Operand("gd", "i", "4")));
-		// set stack pointer
-		codes.add(new Code("sp:=", new Operand("gd", "i", "4")));
-		// find the stack pointer
+    public void cgpop() {
+        // checkType
+        SymbolTableEntry popped = (SymbolTableEntry) popSS();
+        // find the stack pointer
+        codes.add(new Code(":=sp", new Operand("gd", "i", "4")));
+        // decrease stack pointer
+        codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand("im", "i", "4"),
+                new Operand("gd", "i", "4")));
+        // set stack pointer
+        codes.add(new Code("sp:=", new Operand("gd", "i", "4")));
+        // find the stack pointer
 
-		freeIfTemp(popped);
-	}
+        freeIfTemp(popped);
+    }
 
     public void cgread() {
         // find the value of the targeted address
@@ -660,13 +678,13 @@ public class CodeGenerator {
         //todo
     }
 
-	public void cggoForward() {
-		// todo
-	}
+    public void cggoForward() {
+        // todo
+    }
 
-	public void cgarray() {
-		// todo
-	}
+    public void cgarray() {
+        // todo
+    }
 
     public void cgmain() {
         //todo
@@ -714,18 +732,18 @@ public class CodeGenerator {
         //todo
     }
 
-	private void pushCurrent(String type) {
-		// find the stack pointer
-		codes.add(new Code(":=sp", new Operand("gd", "i", "8"), null, null));
-		// push relative address:
-		codes.add(new Code(":=", new Operand("gd", "i", "4"), new Operand("gi", "i", "8"), null));
-		// increase stack pointer
-		codes.add(new Code("+", new Operand("gd", "i", "8"), new Operand("im", "i", "4"),
-				new Operand("gd", "i", "8")));
-		// set stack pointer
-		codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null, null));
-		pushSS(new SymbolTableEntry("temp", 1, 0, true, type));
-	}
+    private void pushCurrent(String type) {
+        // find the stack pointer
+        codes.add(new Code(":=sp", new Operand("gd", "i", "8"), null, null));
+        // push relative address:
+        codes.add(new Code(":=", new Operand("gd", "i", "4"), new Operand("gi", "i", "8"), null));
+        // increase stack pointer
+        codes.add(new Code("+", new Operand("gd", "i", "8"), new Operand("im", "i", "4"),
+                new Operand("gd", "i", "8")));
+        // set stack pointer
+        codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null, null));
+        pushSS(new SymbolTableEntry("temp", 1, 0, true, type));
+    }
 
     private void init() {
 
