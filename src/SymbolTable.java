@@ -3,8 +3,10 @@ import symbolTableEntry.SymbolTableEntry;
 import java.util.ArrayList;
 
 public class SymbolTable {
-    ArrayList<SymbolTableEntry> symbols = new ArrayList<>();
-    SymbolTable parent; // scope in which this symbol table is defined in
+    public static final int SYMBOL_TABLE_SIZE = 1024;
+    public ArrayList<SymbolTableEntry> symbols = new ArrayList<>();
+    public SymbolTable parent; // scope in which this symbol table is defined in
+    public int offset;
 
     public SymbolTable(SymbolTable parent) {
         this.parent = parent;

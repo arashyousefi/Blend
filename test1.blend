@@ -3,15 +3,12 @@ function (integer) main()
 	integer a := 4;
 	integer b := 2;
 	integer c := 1;
-	label l1
-	write(1);
-	goto l3;
-	label l2
-	write(2);
-	goto l4;
-	label l3
-	write(3);
-	goto l2;
-	label l4
-	write(4);
+	do{
+	    do{
+	        write(b);
+	        b := b-1;
+	    }while(b > 0)
+	    write(a);
+	    a := a-1;
+	}while(a > 0)
 }

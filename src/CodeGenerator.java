@@ -8,13 +8,16 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 
 public class CodeGenerator {
+    public static final int STRING_BUFFER_ADDRESS = 100 * 1000;
+    public static final int STRING_SIZE_ADDRESS = 99 * 1000;
+    public static final int STRING_ADDRESS_ADDRESS = 99 * 1000 + 4;
     Scanner scanner; // This was my way of informing CG about Constant Values
     // detected by Scanner, you can do whatever you like
 
     // Define any variables needed for code generation
     Parser parser;
     ArrayList<Object> ss = new ArrayList<>();
-    ArrayList<Code> codes = new ArrayList<Code>();
+    ArrayList<Code> codes = new ArrayList<>();
     int relativeAddress = 0;
     String type;
     Code previousIf;
@@ -23,6 +26,22 @@ public class CodeGenerator {
         this.scanner = scanner;
         this.parser = parser;
         init();
+    }
+
+    private void makeCode(String upcode, String op1, String op2, String op3) {
+        codes.add(new Code(upcode, new Operand(op1), new Operand(op2), new Operand(op3)));
+    }
+
+    private void makeCode(String upcode, String op1, String op2) {
+        codes.add(new Code(upcode, new Operand(op1), new Operand(op2), null));
+    }
+
+    private void makeCode(String upcode, String op1) {
+        codes.add(new Code(upcode, new Operand(op1), null, null));
+    }
+
+    private void makeCode(String upcode) {
+        codes.add(new Code(upcode, null, null, null));
     }
 
     Integer getPc() {
@@ -359,11 +378,12 @@ public class CodeGenerator {
     public void cgdoJz() { // it should be doJnz
         popFirst();
         Integer doLine = (Integer) popSS();
-        codes.add(new Code("!", new Operand("gi", "b", "8"), new Operand("gi", "b", "8")));
+//        codes.add(new Code("!", new Operand("gi", "b", "8"), new Operand("gi", "b", "8")));
+        makeCode("!", "gi_b_8", "gi_b_8");
         // generate the jump Code
-        codes.add(new Code("jz", new Operand("gi", "b", "8"),
-                new Operand("im", "i", doLine.toString())));
-
+//        codes.add(new Code("jz", new Operand("gi", "b", "8"),
+//                new Operand("im", "i", doLine.toString())));
+        makeCode("jz", "gi_b_8", "im_i_" + doLine.toString());
     }
 
     public void cgjpLinks() {
@@ -475,7 +495,90 @@ public class CodeGenerator {
         if (type.equals("real"))
             codes.add(new Code("rf", new Operand("gi", "i", "8"), null, null));
         if (type.equals("string"))
-            codes.add(new Code("rt", new Operand("gi", "i", "8"), null, null));
+            readString();
+//            codes.add(new Code("rt", new Operand("gi", "i", "8"), null, null));
+    }
+
+    private void freeString(int relativeAddress) {
+        // if you are changing the code, change the following values accordingly
+        int start = getPc() + 1;
+        int fm = start + 3;
+        int end = start + 7;
+        int out = start + 8;
+        // start:
+        // mem[8] <-- address of string
+        makeCode("+", "gd_i_0", "im_i_" + relativeAddress, "gd_i_8");
+        // if string is null goto out
+        makeCode("jz", "gi_i_8", "im_i_" + out);
+        // set string to null: m[m[8]] <-- 0
+        makeCode(":=", "im_i_0", "gi_i_8");
+        // fm:
+        // if we reached end of string goto out
+        makeCode("jz", "gi_b_8", "im_i_" + end);
+        // free memory m[8]
+        makeCode("fmm", "gd_i_8", "im_i_1");
+        // ++m[8]
+        makeCode("+", "gd_i_8", "im_i_1", "gd_i_8");
+        // goto fm
+        makeCode("jmp", "im_i_" + fm);
+        // end:
+        // free last char of the string
+        makeCode("fmm", "gd_i_8", "im_i_1");
+        // out:
+    }
+
+    private void freeString() {
+        // if you are changing the code, change the following values accordingly
+        int start = getPc() + 1;
+        int fm = start + 4;
+        int end = start + 8;
+        int out = start + 9;
+        // start:
+        // if string is null goto out
+        makeCode("jz", "gi_i_8", "im_i_" + out);
+        // set string to null: m[m[8]] <-- 0
+        makeCode(":=", "im_i_0", "gi_i_8");
+        // fm:
+        // if we reached end of string goto out
+        makeCode("jz", "gi_b_8", "im_i_" + end);
+        // free memory m[8]
+        makeCode("fmm", "gd_i_8", "im_i_1");
+        // ++m[8]
+        makeCode("+", "gd_i_8", "im_i_1", "gd_i_8");
+        // goto fm
+        makeCode("jmp", "im_i_" + fm);
+        // end:
+        // free last char of the string
+        makeCode("fmm", "gd_i_8", "im_i_1");
+        // out:
+    }
+
+    private void readString() {
+        freeString();
+        int start = getPc() + 1;
+        int out = start; // todo
+        int read_char = start; // todo
+        // set size to 0
+        makeCode(":=", "im_i_0", "gd_i_" + STRING_SIZE_ADDRESS);
+        // read char:
+        // m[add] <-- SA + size
+        makeCode("+", "im_i_" + STRING_BUFFER_ADDRESS, "gd_i_" + STRING_SIZE_ADDRESS, "gd_i_" +
+                STRING_ADDRESS_ADDRESS);
+        // read char into m[add]
+        makeCode("rt", "gi_c_" + STRING_ADDRESS_ADDRESS);
+        // check if read char is not enter
+        makeCode("!=", "im_c_13", "gi_c_" + STRING_ADDRESS_ADDRESS, "gd_b_12");
+        // if so goto out
+        makeCode("jz", "gd_b_12", "im_i_" + out);
+        // ++size
+        makeCode("+", "im_i_1", "gd_i_" + STRING_SIZE_ADDRESS);
+        // goto read char
+        makeCode("jmp", "im_i_" + read_char);
+        // out:
+        // m[add] <-- 0
+        makeCode(":=", "im_c_0", "gi_c_" + STRING_ADDRESS_ADDRESS);
+        // pop address of string into m[4]
+        makeCode("");
     }
 
     public void cgassignStr() {
@@ -535,7 +638,7 @@ public class CodeGenerator {
                     Integer.toString(id.address)), new Operand("gd", "i", "4")));
             // find the stack pointer
             codes.add(new Code(":=sp", new Operand("gd", "i", "8"), null, null));
-            // push relative address:
+            // push address:
             codes.add(new Code(":=", new Operand("gd", "i", "4"), new Operand("gi", "i", "8"),
                     null));
             // increase stack pointer
@@ -544,7 +647,6 @@ public class CodeGenerator {
             // set stack pointer
             codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null, null));
             pushSS(id);
-
         }
     }
 
