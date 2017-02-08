@@ -172,11 +172,20 @@ public class CodeGenerator {
 
     }
 
+    public void cgcontinue() {
+        if (loopLinks.isEmpty()) {
+            throw new RuntimeException("break outside of loop");
+        }
+        LoopLink loopLink = loopLinks.get(loopLinks.size() - 1);
+        makeCode("jmp", "im_i_" + loopLink.start);
+    }
+
     public void cgbreak() {
         if (loopLinks.isEmpty()) {
             throw new RuntimeException("break outside of loop");
         }
         makeCode("jmp");
+        System.err.println("jmp for break in line: " + getPc());
         loopLinks.get(loopLinks.size() - 1).breaks.add(getPc());
     }
 
@@ -369,6 +378,7 @@ public class CodeGenerator {
         int end = getPc() + 1;
         for (Integer i : loopLink.breaks) {
             codes.get(i).op1 = new Operand("im_i_" + end);
+            System.err.println("filled break in line: " + i + " with " + end);
         }
     }
 
