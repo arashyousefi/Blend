@@ -2,14 +2,9 @@ function (integer) main()
 {
 	integer a := 5;
 	integer b := 3;
-    while(b > 0){
-        if(b = 2){
-            b := b-1;
-        }
-        write(1);
-        write(b);
-        write(b-1);
-        b := b-1;
-        write(4);
-    }
+	do{
+	    integer a := 6;
+	    write(a);
+	}while(1 > 2)
+	write(a);
 }

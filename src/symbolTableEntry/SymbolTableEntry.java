@@ -11,20 +11,20 @@ public class SymbolTableEntry {
     public String name;
     public int entryType;
     public int address;
-    public boolean isValue;
-    public String type;
+    public SymbolTable parent;
 
-    public SymbolTableEntry(String name, int entryType, int address,
-                            boolean val, String type) {
+    public SymbolTableEntry(String name, int entryType, int address, SymbolTable symbolTable) {
         //todo clean this shit
+        this.parent = symbolTable;
         this.name = name;
         this.entryType = entryType;
         this.address = address;
-        this.isValue = val;
-        if (entryType == 1)
-            this.type = type;
     }
 
     public SymbolTableEntry() {
+    }
+
+    public int getAddress() {
+        return (parent.offset * 1024 + address);
     }
 }

@@ -1,5 +1,7 @@
 import symbolTableEntry.LabelSymbolTableEntry;
+import symbolTableEntry.SymbolTable;
 import symbolTableEntry.SymbolTableEntry;
+import symbolTableEntry.VarSymbolTableEntry;
 
 import java.io.File;
 import java.io.IOException;
@@ -124,8 +126,10 @@ public class CodeGenerator {
     }
 
     public void cgmake() {
-        parser.currentSymbolTable.addSymbol(scanner.previousID, SymbolTableEntry.VAR,
-                relativeAddress, false, type);
+        parser.currentSymbolTable.addSymbol(new VarSymbolTableEntry(scanner.previousID,
+                relativeAddress, parser.currentSymbolTable, false, type));
+//        parser.currentSymbolTable.addSymbol(scanner.previousID, SymbolTableEntry.VAR,
+//                relativeAddress, false, type);
         // needs TODO if we want to implement structures!
         if (type.equals("boolean"))
             ++relativeAddress;
@@ -160,11 +164,12 @@ public class CodeGenerator {
     }
 
     public void cgstartBlock() {
-        // TODO
+        SymbolTable symbolTable = new SymbolTable(parser.currentSymbolTable);
+        parser.currentSymbolTable = symbolTable;
     }
 
     public void cgendBlock() {
-        // TODO
+        parser.currentSymbolTable = parser.currentSymbolTable.parent;
     }
 
     public void cgreleaseStr() {
@@ -206,16 +211,17 @@ public class CodeGenerator {
         SymbolTableEntry symbolTableEntry = parser.currentSymbolTable.findSymbol(id, false);
         if (symbolTableEntry != null) {// label was created before
             LabelSymbolTableEntry labelSymbolTableEntry = (LabelSymbolTableEntry) symbolTableEntry;
-            if (labelSymbolTableEntry.address == -1) { // just add it to the references
+            if (labelSymbolTableEntry.line == -1) { // just add it to the references
 //                System.err.println("goto without address " + id);
                 labelSymbolTableEntry.references.add(getPc());
             } else { // we know the address
 //                System.err.println("goto with address " + id);
-                gotoCode.op1 = new Operand("im", "i", labelSymbolTableEntry.address.toString());
+                gotoCode.op1 = new Operand("im", "i", labelSymbolTableEntry.line.toString());
             }
         } else { // we have to create it now
 //            System.err.println("new goto without address " + id);
-            LabelSymbolTableEntry labelSymbolTableEntry = new LabelSymbolTableEntry(id);
+            LabelSymbolTableEntry labelSymbolTableEntry = new LabelSymbolTableEntry(id, -1,
+                    parser.currentSymbolTable, -1);
             labelSymbolTableEntry.references.add(getPc());
             parser.currentSymbolTable.addSymbol(labelSymbolTableEntry);
         }
@@ -226,18 +232,18 @@ public class CodeGenerator {
         SymbolTableEntry symbolTableEntry = parser.currentSymbolTable.findSymbol(id, false);
         if (symbolTableEntry == null) { // just create, no need to do anything
 //            System.err.println("new label " + id);
-            LabelSymbolTableEntry labelSymbolTableEntry = new LabelSymbolTableEntry(id);
-            labelSymbolTableEntry.address = getPc() + 1;
+            LabelSymbolTableEntry labelSymbolTableEntry = new LabelSymbolTableEntry(id, -1,
+                    parser.currentSymbolTable, getPc() + 1);
             parser.currentSymbolTable.addSymbol(labelSymbolTableEntry);
 
         } else {
 //            System.err.println("label " + id);
             LabelSymbolTableEntry labelSymbolTableEntry = (LabelSymbolTableEntry) symbolTableEntry;
-            labelSymbolTableEntry.address = getPc() + 1;
+            labelSymbolTableEntry.line = getPc() + 1;
             for (int i : labelSymbolTableEntry.references) {
 //                System.err.println("fixed code " + id + " " + i);
                 codes.get(i).op1 = new Operand("im", "i",
-                        labelSymbolTableEntry.address.toString());
+                        labelSymbolTableEntry.line.toString());
             }
             labelSymbolTableEntry.references.clear();
         }
@@ -483,18 +489,21 @@ public class CodeGenerator {
 
     public void cgmakeConstInteger() {
         // find the constant if not found make an entry
-        SymbolTableEntry id = parser.currentSymbolTable.findSymbol(scanner.CV, true);
+        SymbolTableEntry id = parser.currentSymbolTable.findSymbol(scanner.CV, false);
         boolean notSet = true;
         if (id == null) {
-            id = parser.currentSymbolTable.addSymbol(scanner.CV, SymbolTableEntry.VAR,
-                    relativeAddress, false, "integer");
+            id = new VarSymbolTableEntry(scanner.CV, relativeAddress, parser.currentSymbolTable,
+                    false, "integer");
+            parser.currentSymbolTable.addSymbol(id);
+//            id = parser.currentSymbolTable.addSymbol(scanner.CV, SymbolTableEntry.VAR,
+//                    relativeAddress, false, "integer");
             relativeAddress += 4;
             // set the constant
             codes.add(new Code(":=", new Operand("gd", "i", "0"), new Operand("gd", "i", "4"),
                     null));
             // add relative address
             codes.add(new Code("+", new Operand("gd", "i", "4"), new Operand("im", "i",
-                    Integer.toString(id.address)), new Operand("gd", "i", "4")));
+                    Integer.toString(id.getAddress())), new Operand("gd", "i", "4")));
             // set constant value
             codes.add(new Code(":=", new Operand("im", "i", scanner.CV), new Operand("gi",
                     "i", "4"), null));
@@ -507,7 +516,7 @@ public class CodeGenerator {
                     null));
             // add relative address
             codes.add(new Code("+", new Operand("gd", "i", "4"), new Operand("im", "i",
-                    Integer.toString(id.address)), new Operand("gd", "i", "4")));
+                    Integer.toString(id.getAddress())), new Operand("gd", "i", "4")));
         }
         // push relative address:
         // find the stack pointer
@@ -564,7 +573,7 @@ public class CodeGenerator {
 
     public void cgpop() {
         // checkType
-        SymbolTableEntry popped = (SymbolTableEntry) popSS();
+        VarSymbolTableEntry popped = (VarSymbolTableEntry) popSS();
         // find the stack pointer
         codes.add(new Code(":=sp", new Operand("gd", "i", "4")));
         // decrease stack pointer
@@ -723,7 +732,7 @@ public class CodeGenerator {
                     null));
             // add relative address
             codes.add(new Code("+", new Operand("gd", "i", "4"), new Operand("im", "i",
-                    Integer.toString(id.address)), new Operand("gd", "i", "4")));
+                    Integer.toString(id.getAddress())), new Operand("gd", "i", "4")));
             // find the stack pointer
             codes.add(new Code(":=sp", new Operand("gd", "i", "8"), null, null));
             // push address:
@@ -752,12 +761,12 @@ public class CodeGenerator {
                 new Operand("gd", "i", "8")));
         // set stack pointer
         codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null, null));
-        pushSS(new SymbolTableEntry("temp", 1, 0, true, type));
+        pushSS(new VarSymbolTableEntry("temp", -1, null, true, type));
     }
 
     private void init() {
 
-        codes.add(new Code("gmm", new Operand("im", "i", "1024"), new Operand("gd", "i", "0"),
+        codes.add(new Code("gmm", new Operand("im", "i", "1048576"), new Operand("gd", "i", "0"),
                 null));
 
     }
@@ -795,7 +804,7 @@ public class CodeGenerator {
 
     private String popFirst() {
         // checkType
-        SymbolTableEntry popped = (SymbolTableEntry) popSS();
+        VarSymbolTableEntry popped = (VarSymbolTableEntry) popSS();
         // find the stack pointer
         codes.add(new Code(":=sp", new Operand("gd", "i", "4")));
         // decrease stack pointer
@@ -812,14 +821,14 @@ public class CodeGenerator {
         return popped.type;
     }
 
-    private void freeIfTemp(SymbolTableEntry popped) {
-        if (popped.isValue)
+    private void freeIfTemp(VarSymbolTableEntry popped) {
+        if (popped.val)
             codes.add(new Code("fmm", new Operand("gd", "i", "8"), new Operand("im", "i", "4")));
     }
 
     private String popSecond() {
         // checkType
-        SymbolTableEntry popped = (SymbolTableEntry) popSS();
+        VarSymbolTableEntry popped = (VarSymbolTableEntry) popSS();
         // find the stack pointer
         codes.add(new Code(":=sp", new Operand("gd", "i", "4")));
         // decrease stack pointer
@@ -836,8 +845,8 @@ public class CodeGenerator {
         return popped.type;
     }
 
-    private void freeIfTemp2(SymbolTableEntry popped) {
-        if (popped.isValue)
+    private void freeIfTemp2(VarSymbolTableEntry popped) {
+        if (popped.val)
             codes.add(new Code("fmm", new Operand("gd", "i", "12"), new Operand("im", "i", "4")));
     }
 

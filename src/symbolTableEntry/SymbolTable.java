@@ -1,4 +1,4 @@
-import symbolTableEntry.SymbolTableEntry;
+package symbolTableEntry;
 
 import java.util.ArrayList;
 
@@ -10,9 +10,12 @@ public class SymbolTable {
 
     public SymbolTable(SymbolTable parent) {
         this.parent = parent;
+        this.offset = parent.offset + 1;
     }
 
     public SymbolTable() {
+        parent = null;
+        offset = 0;
     }
 
     public SymbolTableEntry findSymbol(String name, boolean findInParent) {
@@ -28,11 +31,11 @@ public class SymbolTable {
         symbols.add(symbolTableEntry);
     }
 
-    public SymbolTableEntry addSymbol(String name, int entryType, int address,
-                                      boolean val, String type) {
-        SymbolTableEntry symbolTableEntry = new SymbolTableEntry(name,
-                entryType, address, val, type);
-        symbols.add(symbolTableEntry);
-        return symbolTableEntry;
-    }
+//    public SymbolTableEntry addSymbol(String name, int entryType, int address,
+//                                      boolean val, String type) {
+//        SymbolTableEntry symbolTableEntry = new SymbolTableEntry(name,
+//                entryType, address, val, type);
+//        symbols.add(symbolTableEntry);
+//        return symbolTableEntry;
+//    }
 }
