@@ -1,14 +1,25 @@
 function (integer) main()
 {
-	integer a := 4;
-	integer b := 2;
-	integer c := 1;
-	do{
-	    do{
-	        write(b);
-	        b := b-1;
-	    }while(b > 0)
-	    write(a);
-	    a := a-1;
-	}while(a > 0)
+	integer a := 5;
+	integer b := 3;
+	case (a) of 
+		7:{
+			write(8);
+		}
+		4 : {
+			write(4);
+		}
+
+		5 : {
+			case(b) of 
+				6:{
+					write(6);
+				} 
+				3:{
+					write(3);
+				}
+			endcase
+			write(5);
+		}
+	endcase
 }
