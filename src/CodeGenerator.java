@@ -377,6 +377,7 @@ public class CodeGenerator {
 
 	public void cgpushFirstAddr() {
 		cgpop();
+		
 		firstLinks.add(new CaseLink(getPc() + 1, Integer.parseInt(scanner.CV)));
 	}
 
