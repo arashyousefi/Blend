@@ -1,7 +1,8 @@
 function (integer) main()
 {
+    integer a;
+    read (a);
 	real b;
-	read (b);
-	integer a:=b;
-	write(a);
+	b := a;
+	write(b);
 }
