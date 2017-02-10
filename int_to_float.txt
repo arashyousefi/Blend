@@ -1,0 +1,23 @@
+ri gd_i_0
+jz gd_i_0 im_i_21
+:= im_i_0 gd_i_4
+:= im_i_0 gd_i_8
+< gd_i_0 im_i_0 gd_b_4
+jz gd_b_4 im_i_7
+u- gd_i_0 gd_i_0
+& im_i_-2147483648 gd_i_0 gd_i_12
+^ im_i_-2147483648 gd_i_12 gd_i_12
+jz gd_i_12 im_i_13
+<< im_i_1 gd_i_0
++ im_i_1 gd_i_8 gd_i_8
+jmp im_i_7
+<< im_i_1 gd_i_0
+>> im_i_9 gd_i_0
+- im_i_31 gd_i_8 gd_i_8
++ im_i_127 gd_i_8 gd_i_8
+<< im_i_23 gd_i_8
+<< im_i_31 gd_i_4
+| gd_i_0 gd_i_4 gd_i_0
+| gd_i_0 gd_i_8 gd_i_0
+wf gd_f_0
+
