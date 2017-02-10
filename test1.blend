@@ -1,8 +1,11 @@
 function (integer) main()
 {
-    integer a;
-    read (a);
-	real b;
-	b := a;
-	write(b);
+    integer a := -10;
+    real b := 2;
+    write(b);
+    character c := 'a';
+    character d := 'd';
+	write(2.5*2);
+	write(2);
+	write( (2.5*2) > 2 );
 }

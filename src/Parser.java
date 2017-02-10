@@ -81,6 +81,7 @@ public class Parser {
             cg.FinishCode();
         } catch (Exception e) {
             e.printStackTrace();
+            throw new RuntimeException(e.getMessage());
         }
     }
 

@@ -18,7 +18,7 @@ public class CodeGenerator {
 	public static final String FLOAT_H2 = "24";
 	public static final String FLOAT_H3 = "28";
 	public static final String FLOAT_H4 = "32";
-
+	public static final String CASTED = "36";
 	Scanner scanner; // This was my way of informing CG about Constant Values
 	// detected by Scanner, you can do whatever you like
 
@@ -32,6 +32,11 @@ public class CodeGenerator {
 
 	ArrayList<CaseLink> firstLinks = new ArrayList<>();
 	ArrayList<LoopLink> loopLinks = new ArrayList<>();
+
+	public String[] bitwiseOperators = { "&", "|", "^", "%" };
+	public String[] logicalOperators = { "=", "!=", ">", "<", ">=", "<=", "&&", "||" };
+	public String[] arithmeticOperators = { "*", "/", "+", "-" };
+	public String[] goodTypes = { "real", "integer", "boolean", "character" };
 
 	public CodeGenerator(Scanner scanner, Parser parser) {
 		this.scanner = scanner;
@@ -84,6 +89,7 @@ public class CodeGenerator {
 				e.printStackTrace();
 				// todo fail
 			} catch (InvocationTargetException e) {
+				e.printStackTrace();
 				// todo fail
 			}
 		} catch (SecurityException e) {
@@ -589,14 +595,14 @@ public class CodeGenerator {
 			parser.currentSymbolTable.addSymbol(id);
 			// id = parser.currentSymbolTable.addSymbol(scanner.CV, SymbolTableEntry.VAR,
 			// relativeAddress, false, "integer");
-			relativeAddress ++;
+			relativeAddress++;
 			// set the constant
 			// add relative address
 			codes.add(new Code("+", new Operand("gd", "i", "0"), new Operand("im", "i", Integer
 					.toString(id.getAddress())), new Operand("gd", "i", "4")));
 			// set constant value
-			codes.add(new Code(":=", new Operand("im", "b", input ? "true" : "false" + ""), new Operand(
-					"gi", "b", "4"), null));
+			codes.add(new Code(":=", new Operand("im", "b", input ? "true" : "false" + ""),
+					new Operand("gi", "b", "4"), null));
 			notSet = false;
 		}
 		// push the entry
@@ -928,18 +934,86 @@ public class CodeGenerator {
 	}
 
 	private void binary(String operand) {
+		if (isLogicalOperator(operand)) {
+			logicalBinary(operand);
+		} else if (isArithmeticOperator(operand)) {
+			arithmeticBinary(operand);
+		} else if (isBitwiseOperator(operand)) {
+			bitwiseBinary(operand);
+		} else {
+			throw new RuntimeException("invalid Operator");
+		}
+
+	}
+
+	private void bitwiseBinary(String operand) {
 		// condition change if cast!
 		if (popFirst().equals("integer") && popSecond().equals("integer")) {
-			// get a temp
-			codes.add(new Code("gmm", new Operand("im", "i", "4"), new Operand("gd", "i", "4"),
-					null));
-			// binary this and push
-			codes.add(new Code(operand, new Operand("gi", "i", "12"), new Operand("gi", "i", "8"),
-					new Operand("gi", "i", "4")));
+			makeCode("gmm", "im_i_4", "gd_i_4");
+			makeCode(operand, "gi_i_12", "gi_i_8", "gi_i_4");
 			this.pushCurrent("integer");
 		} else {
-			// TODO ERROR!
+			throw new RuntimeException("invalid arguments");
 		}
+	}
+
+	private void arithmeticBinary(String operand) {
+		String type1 = popFirst();
+		String type2 = popSecond();
+		String outputType = "i";
+
+		if (!(isGoodType(type2) && isGoodType(type1)))
+			throw new RuntimeException("invalid argument types");
+		if (type1.equals("real") || type2.equals("real"))
+			outputType = "f";
+		if (!type1.equals(type2)) {
+			if (isBigger(type1, type2)) {
+				itof("gi_i_12", "gd_f_" + CASTED);
+				makeCode(":=", "im_i_" + CASTED, "gd_i_12");
+			} else if (isBigger(type2, type1)) {
+				itof("gi_i_8", "gd_f_" + CASTED);
+				makeCode(":=", "im_i_" + CASTED, "gd_i_8");
+			}
+		}
+		makeCode("gmm", "im_i_4", "gd_i_4");
+		makeCode(operand, "gi_" + outputType + "_12", "gi_" + outputType + "_8", "gi_i_4");
+		this.pushCurrent(outputType.equals("f") ? "real" : "integer");
+
+	}
+
+	private void logicalBinary(String operand) {
+		String type1 = popFirst();
+		String type2 = popSecond();
+		String outputType = "i";
+
+		if (!(isGoodType(type2) && isGoodType(type1)))
+			throw new RuntimeException("invalid argument types");
+		if (type1.equals("real") || type2.equals("real"))
+			outputType = "f";
+		if (!type1.equals(type2)) {
+			if (isBigger(type1, type2)) {
+				itof("gi_i_12", "gd_f_" + CASTED);
+				makeCode(":=", "im_i_" + CASTED, "gd_i_12");
+			} else if (isBigger(type2, type1)) {
+				itof("gi_i_8", "gd_f_" + CASTED);
+				makeCode(":=", "im_i_" + CASTED, "gd_i_8");
+			}
+		}
+		makeCode("gmm", "im_i_4", "gd_i_4");
+		makeCode(operand, "gi_" + outputType + "_12", "gi_" + outputType + "_8", "gi_b_4");
+		this.pushCurrent("boolean");
+
+	}
+
+	private boolean isGoodType(String type) {
+		for (String s : goodTypes)
+			if (s.equals(type))
+				return true;
+		return false;
+	}
+
+	private boolean isBigger(String type1, String type2) {
+		return type1.equals("real");
 	}
 
 	private void unary(String operand) {
@@ -1004,6 +1078,27 @@ public class CodeGenerator {
 	private void freeIfTemp2(VarSymbolTableEntry popped) {
 		if (popped.val)
 			codes.add(new Code("fmm", new Operand("gd", "i", "12"), new Operand("im", "i", "4")));
+	}
+
+	private boolean isLogicalOperator(String op) {
+		for (String s : logicalOperators)
+			if (s.equals(op))
+				return true;
+		return false;
+	}
+
+	private boolean isBitwiseOperator(String op) {
+		for (String s : bitwiseOperators)
+			if (s.equals(op))
+				return true;
+		return false;
+	}
+
+	private boolean isArithmeticOperator(String op) {
+		for (String s : arithmeticOperators)
+			if (s.equals(op))
+				return true;
+		return false;
 	}
 
 	public void FinishCode() // You may need this
