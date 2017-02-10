@@ -1,0 +1,20 @@
+:= im_f_12.49999 gd_f_0
+:= im_f_12.49999 gd_f_4
+:= im_f_12.49999 gd_f_8
+& im_i_-2147483648 gd_i_0 gd_i_4
+<< im_i_9 gd_i_0
+<< im_i_1 gd_i_8 
+>> im_i_24 gd_i_8
+>> im_i_1 gd_i_0
+| im_i_-2147483648 gd_i_0 gd_i_0
+- gd_i_8 im_i_127 gd_i_8
+- im_i_30 gd_i_8 gd_i_8
+>> gd_i_8 gd_i_0
+& im_i_1 gd_i_0 gd_i_12
+>> im_i_1 gd_i_0
++ gd_i_0 gd_i_12 gd_i_0
+jz gd_i_4 im_i_17 
+u- gd_i_0 gd_i_0
+wi gd_i_0
+
+
