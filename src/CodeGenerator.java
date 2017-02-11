@@ -763,7 +763,7 @@ public class CodeGenerator {
 		// todo
 	}
 
-	public void cgaddstr() {
+	public void cgaddStr() {
 		parser.structs.add(scanner.previousID);
 		// todo
 	}
