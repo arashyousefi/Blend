@@ -15,7 +15,7 @@ structure s1{
 }
 function (integer) main()
 {
-    integer a := 0x7;
+    integer a := 70;
     write(a);
     real b := 2;
     write(b);

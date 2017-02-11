@@ -365,7 +365,7 @@ public class CodeGenerator {
 	public void cgjz() {
 		popFirst();
 		// generate the jump Code
-		codes.add(new Code("jz", new Operand("gi", "b", "8")));
+		makeCode("jz", "gi_b_8");
 		pushSS(getPc());
 	}
 
@@ -377,8 +377,7 @@ public class CodeGenerator {
 
 	public void cgjpCmpJz() {
 		previousIf.op2 = new Operand("im", "i", Integer.toString(getPc() + 2));
-
-		codes.add(new Code("jmp"));
+		makeCode("jmp");
 		pushSS(getPc());
 
 	}
@@ -404,8 +403,7 @@ public class CodeGenerator {
 		whileCode.op2 = new Operand("im", "i", Integer.toString(getPc() + 2));
 
 		Integer whileEvalLine = (Integer) popSS();
-
-		codes.add(new Code("jmp", new Operand("im", "i", whileEvalLine.toString())));
+		makeCode("jmp", "im_i" + whileEvalLine);
 		fillBreaks();
 	}
 
@@ -421,22 +419,19 @@ public class CodeGenerator {
 	public void cgdoJz() { // it should be doJnz
 		popFirst();
 		Integer doLine = (Integer) popSS();
-		// codes.add(new Code("!", new Operand("gi", "b", "8"), new Operand("gi", "b", "8")));
 		makeCode("!", "gi_b_8", "gi_b_8");
 		// generate the jump Code
-		// codes.add(new Code("jz", new Operand("gi", "b", "8"),
-		// new Operand("im", "i", doLine.toString())));
 		makeCode("jz", "gi_b_8", "im_i_" + doLine.toString());
 		fillBreaks();
 	}
 
 	public void cgcaseJump() {
 		popFirst();
-		codes.add(new Code("-", new Operand("gi", "i", "8"), null, new Operand("gd", "i", "12")));
+		makeCode("-", "gi_i_8", "", "gd_i_12");
 		pushSS(getPc());
-		codes.add(new Code("+", new Operand("gd", "i", "12"), null, new Operand("gd", "i", "12")));
+		makeCode("+", "gd_i_12", "", "gd_i_12");
 		pushSS(getPc());
-		codes.add(new Code("jmp", new Operand("gd", "i", "12")));
+		makeCode("jmp", "gd_i_12");
 	}
 
 	public void cgpushFirstAddr() {
@@ -455,7 +450,7 @@ public class CodeGenerator {
 	}
 
 	public void cgjpLink() {
-		codes.add(new Code("jmp"));
+		makeCode("jmp");
 		pushSS(getPc());
 	}
 
@@ -470,9 +465,8 @@ public class CodeGenerator {
 		CaseLink min = Collections.min(lastCase);
 		Integer out = getPc() + max.value - min.value + 2;
 		Integer start = getPc() + 1;
-		for (int i = min.value; i <= max.value; ++i) {
-			codes.add(new Code("jmp", new Operand("im", "i", out.toString())));
-		}
+		for (int i = min.value; i <= max.value; ++i)
+			makeCode("jmp", "im_i_" + out);
 		for (CaseLink cl : lastCase)
 			codes.get(start + cl.value - min.value).op1 = new Operand("im", "i",
 					cl.address.toString());
@@ -511,11 +505,9 @@ public class CodeGenerator {
 			relativeAddress += 4;
 			// set the constant
 			// add relative address
-			codes.add(new Code("+", new Operand("gd", "i", "0"), new Operand("im", "i", Integer
-					.toString(id.getAddress())), new Operand("gd", "i", "4")));
+			makeCode("+", "gd_i_0", "im_i_" + Integer.toString(id.getAddress()), "gd_i_4");
 			// set constant value
-			codes.add(new Code(":=", new Operand("im", "i", scanner.CV), new Operand("gi", "i",
-					"4"), null));
+			makeCode(":=", "im_i_" + scanner.CV, "gi_i_4");
 			notSet = false;
 		}
 		// push the entry
@@ -536,11 +528,9 @@ public class CodeGenerator {
 			relativeAddress += 1;
 			// set the constant
 			// add relative address
-			codes.add(new Code("+", new Operand("gd", "i", "0"), new Operand("im", "i", Integer
-					.toString(id.getAddress())), new Operand("gd", "i", "4")));
+			makeCode("+", "gd_i_0", "im_i_" + Integer.toString(id.getAddress()), "gd_i_4");
 			// set constant value
-			codes.add(new Code(":=", new Operand("im", "c", scanner.CV.charAt(1) + ""),
-					new Operand("gi", "c", "4"), null));
+			makeCode(":=", "im_c_" + scanner.CV.charAt(1), "gi_c_4");
 			notSet = false;
 		}
 		// push the entry
@@ -565,11 +555,9 @@ public class CodeGenerator {
 			relativeAddress += 4;
 			// set the constant
 			// add relative address
-			codes.add(new Code("+", new Operand("gd", "i", "0"), new Operand("im", "i", Integer
-					.toString(id.getAddress())), new Operand("gd", "i", "4")));
+			makeCode("+", "gd_i_0", "im_i_" + Integer.toString(id.getAddress()), "gd_i_4");
 			// set constant value
-			codes.add(new Code(":=", new Operand("im", "f", scanner.CV), new Operand("gi", "f",
-					"4"), null));
+			makeCode(":=", "im_f_" + scanner.CV, "gi_f_4");
 			notSet = false;
 		}
 		// push the entry
@@ -593,16 +581,12 @@ public class CodeGenerator {
 			id = new VarSymbolTableEntry(scanner.CV, relativeAddress, parser.currentSymbolTable,
 					false, "boolean");
 			parser.currentSymbolTable.addSymbol(id);
-			// id = parser.currentSymbolTable.addSymbol(scanner.CV, SymbolTableEntry.VAR,
-			// relativeAddress, false, "integer");
 			relativeAddress++;
 			// set the constant
-			// add relative address
-			codes.add(new Code("+", new Operand("gd", "i", "0"), new Operand("im", "i", Integer
-					.toString(id.getAddress())), new Operand("gd", "i", "4")));
+			// find address
+			makeCode("+", "gd_i_0", "im_i_" + Integer.toString(id.getAddress()), "gd_i_4");
 			// set constant value
-			codes.add(new Code(":=", new Operand("im", "b", input ? "true" : "false" + ""),
-					new Operand("gi", "b", "4"), null));
+			makeCode(":=", "im_b_" + (input ? "true" : "false"), "gi_b_4");
 			notSet = false;
 		}
 		// push the entry
@@ -611,18 +595,14 @@ public class CodeGenerator {
 
 	private void pushConst(boolean notSet, VarSymbolTableEntry id) {
 		if (notSet)
-			codes.add(new Code("+", new Operand("gd", "i", "0"), new Operand("im", "i", Integer
-					.toString(id.getAddress())), new Operand("gd", "i", "4")));
+			makeCode("+", "gd_i_0", "im_i_" + Integer.toString(id.getAddress()), "gd_i_4");
 		// push relative address:
 		// find the stack pointer
-		codes.add(new Code(":=sp", new Operand("gd", "i", "8"), null, null));
+		makeCode(":=sp", "gd_i_8");
 		// push relative address:
-		codes.add(new Code(":=", new Operand("gd", "i", "4"), new Operand("gi", "i", "8"), null));
+		makeCode(":=", "gd_i_4", "gi_i_8");
 		// increase stack pointer
-		codes.add(new Code("+", new Operand("gd", "i", "8"), new Operand("im", "i", "4"),
-				new Operand("gd", "i", "8")));
-		// set stack pointer
-		codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null, null));
+		makeCode("+sp", "im_i_4");
 		pushSS(id);
 	}
 
@@ -638,29 +618,24 @@ public class CodeGenerator {
 		// find the value of the targeted address
 		String type = popFirst();
 		if (type.equals("integer"))
-			codes.add(new Code("wi", new Operand("gi", "i", "8"), null, null));
+			makeCode("wi", "gi_i_8");
 		if (type.equals("character"))
-			codes.add(new Code("wt", new Operand("gi", "c", "8"), null, null));
+			makeCode("wt", "gi_c_8");
 		if (type.equals("real"))
-			codes.add(new Code("wf", new Operand("gi", "f", "8"), null, null));
+			makeCode("wf", "gi_f_8");
 		if (type.equals("string"))
-			codes.add(new Code("wt", new Operand("gi", "i", "8"), null, null));
+			makeCode("wt", "gi_i_8");
 		if (type.equals("boolean"))
-			codes.add(new Code("wi", new Operand("gi", "i", "8"), null, null));
+			makeCode("wi", "gi_b_8");
 
 	}
 
 	public void cgpop() {
 		// checkType
 		VarSymbolTableEntry popped = (VarSymbolTableEntry) popSS();
-		// find the stack pointer
-		codes.add(new Code(":=sp", new Operand("gd", "i", "4")));
+
 		// decrease stack pointer
-		codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand("im", "i", "4"),
-				new Operand("gd", "i", "4")));
-		// set stack pointer
-		codes.add(new Code("sp:=", new Operand("gd", "i", "4")));
-		// find the stack pointer
+		makeCode("-sp", "im_i_4");
 
 		freeIfTemp(popped);
 	}
@@ -669,9 +644,9 @@ public class CodeGenerator {
 		// find the value of the targeted address
 		String type = popFirst();
 		if (type.equals("integer"))
-			codes.add(new Code("ri", new Operand("gi", "i", "8"), null, null));
+			makeCode("ri", "gi_i_8");
 		if (type.equals("real"))
-			codes.add(new Code("rf", new Operand("gi", "f", "8"), null, null));
+			makeCode("rf", "gi_f_8");
 		if (type.equals("string"))
 			readString();
 		// codes.add(new Code("rt", new Operand("gi", "i", "8"), null, null));
@@ -798,17 +773,13 @@ public class CodeGenerator {
 
 		if (type1.equals(type2)) {
 			if (type1.equals("integer"))
-				codes.add(new Code(":=", new Operand("gi", "i", "8"),
-						new Operand("gi", "i", "12"), null));
+				makeCode(":=", "gi_i_8", "gi_i_12");
 			if (type1.equals("boolean"))
-				codes.add(new Code(":=", new Operand("gi", "b", "8"),
-						new Operand("gi", "b", "12"), null));
+				makeCode(":=", "gi_b_8", "gi_b_12");
 			if (type1.equals("character"))
-				codes.add(new Code(":=", new Operand("gi", "c", "8"),
-						new Operand("gi", "c", "12"), null));
+				makeCode(":=", "gi_c_8", "gi_c_12");
 			if (type1.equals("real"))
-				codes.add(new Code(":=", new Operand("gi", "f", "8"),
-						new Operand("gi", "f", "12"), null));
+				makeCode(":=", "gi_f_8", "gi_f_12");
 
 		} else {
 			if (type1.equals("real") && type2.equals("integer")) {
@@ -889,22 +860,15 @@ public class CodeGenerator {
 		if (id == null) {
 			// TODO runtime exception here!
 		} else {
-			// get heap address:
-			codes.add(new Code(":=", new Operand("gd", "i", "0"), new Operand("gd", "i", "4"),
-					null));
-			// add relative address
-			codes.add(new Code("+", new Operand("gd", "i", "4"), new Operand("im", "i", Integer
-					.toString(id.getAddress())), new Operand("gd", "i", "4")));
+			// find address:
+			makeCode("+", "gd_i_0", "im_i_" + Integer.toString(id.getAddress()), "gd_i_4");
 			// find the stack pointer
-			codes.add(new Code(":=sp", new Operand("gd", "i", "8"), null, null));
+			makeCode(":=sp", "gd_i_8");
 			// push address:
-			codes.add(new Code(":=", new Operand("gd", "i", "4"), new Operand("gi", "i", "8"),
-					null));
+			makeCode(":=", "gd_i_4", "gi_i_8");
 			// increase stack pointer
-			codes.add(new Code("+", new Operand("gd", "i", "8"), new Operand("im", "i", "4"),
-					new Operand("gd", "i", "8")));
-			// set stack pointer
-			codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null, null));
+			makeCode("+sp", "im_i_4");
+
 			pushSS(id);
 		}
 	}
@@ -915,21 +879,17 @@ public class CodeGenerator {
 
 	private void pushCurrent(String type) {
 		// find the stack pointer
-		codes.add(new Code(":=sp", new Operand("gd", "i", "8"), null, null));
+		makeCode(":=sp", "gd_i_8");
 		// push relative address:
-		codes.add(new Code(":=", new Operand("gd", "i", "4"), new Operand("gi", "i", "8"), null));
+		makeCode(":=", "gd_i_4", "gi_i_8");
 		// increase stack pointer
-		codes.add(new Code("+", new Operand("gd", "i", "8"), new Operand("im", "i", "4"),
-				new Operand("gd", "i", "8")));
-		// set stack pointer
-		codes.add(new Code("sp:=", new Operand("gd", "i", "8"), null, null));
+		makeCode("+sp", "im_i_4");
+
 		pushSS(new VarSymbolTableEntry("temp", -1, null, true, type));
 	}
 
 	private void init() {
-
-		codes.add(new Code("gmm", new Operand("im", "i", "1048576"), new Operand("gd", "i", "0"),
-				null));
+		makeCode("gmm", "im_i_1048576", "gd_i_0");
 
 	}
 
@@ -1020,11 +980,9 @@ public class CodeGenerator {
 
 		if (popFirst().equals("integer")) {
 			// get a temp
-			codes.add(new Code("gmm", new Operand("im", "i", "4"), new Operand("gd", "i", "4"),
-					null));
+			makeCode("gmm", "im_i_4", "gd_i_4");
 			// unary this and set currentValue
-			codes.add(new Code(operand, new Operand("gi", "i", "8"), new Operand("gi", "i", "4"),
-					null));
+			makeCode(operand, "gi_i_8", "gi_i_4");
 			// push currentValue
 			this.pushCurrent("integer");
 		} else {
@@ -1035,17 +993,12 @@ public class CodeGenerator {
 	private String popFirst() {
 		// checkType
 		VarSymbolTableEntry popped = (VarSymbolTableEntry) popSS();
-		// find the stack pointer
-		codes.add(new Code(":=sp", new Operand("gd", "i", "4")));
 		// decrease stack pointer
-		codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand("im", "i", "4"),
-				new Operand("gd", "i", "4")));
-		// set stack pointer
-		codes.add(new Code("sp:=", new Operand("gd", "i", "4")));
+		makeCode("-sp", "im_i_4");
 		// find the stack pointer
-		codes.add(new Code(":=sp", new Operand("gd", "i", "4")));
+		makeCode(":=sp", "gd_i_4");
 		// pop operand
-		codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand("gd", "i", "8")));
+		makeCode(":=", "gi_i_4", "gd_i_8");
 
 		freeIfTemp(popped);
 		return popped.type;
@@ -1053,23 +1006,18 @@ public class CodeGenerator {
 
 	private void freeIfTemp(VarSymbolTableEntry popped) {
 		if (popped.val)
-			codes.add(new Code("fmm", new Operand("gd", "i", "8"), new Operand("im", "i", "4")));
+			makeCode("fmm", "gd_i_8", "im_i_4");
 	}
 
 	private String popSecond() {
 		// checkType
 		VarSymbolTableEntry popped = (VarSymbolTableEntry) popSS();
-		// find the stack pointer
-		codes.add(new Code(":=sp", new Operand("gd", "i", "4")));
 		// decrease stack pointer
-		codes.add(new Code("-", new Operand("gd", "i", "4"), new Operand("im", "i", "4"),
-				new Operand("gd", "i", "4")));
-		// set stack pointer
-		codes.add(new Code("sp:=", new Operand("gd", "i", "4")));
+		makeCode("-sp", "im_i_4");
 		// find the stack pointer
-		codes.add(new Code(":=sp", new Operand("gd", "i", "4")));
-		// pop first operand
-		codes.add(new Code(":=", new Operand("gi", "i", "4"), new Operand("gd", "i", "12")));
+		makeCode(":=sp", "gd_i_4");
+		// pop operand
+		makeCode(":=", "gi_i_4", "gd_i_12");
 		// freeIfTemp();
 		freeIfTemp2(popped);
 		return popped.type;
@@ -1077,7 +1025,7 @@ public class CodeGenerator {
 
 	private void freeIfTemp2(VarSymbolTableEntry popped) {
 		if (popped.val)
-			codes.add(new Code("fmm", new Operand("gd", "i", "12"), new Operand("im", "i", "4")));
+			makeCode("fmm", "gd_i_12", "im_i_4");
 	}
 
 	private boolean isLogicalOperator(String op) {
@@ -1103,7 +1051,7 @@ public class CodeGenerator {
 
 	public void FinishCode() // You may need this
 	{
-		codes.add(new Code("fmm", new Operand("gd", "i", "0"), new Operand("im", "i", "1024")));
+		makeCode("fmm", "gd_i_0", "im_i_1048576");
 	}
 
 	public void WriteOutput(String outputName) {
