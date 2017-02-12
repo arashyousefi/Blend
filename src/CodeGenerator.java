@@ -201,7 +201,6 @@ public class CodeGenerator {
 			throw new RuntimeException("break outside of loop");
 		}
 		makeCode("jmp");
-		System.err.println("jmp for break in line: " + getPc());
 		loopLinks.get(loopLinks.size() - 1).breaks.add(getPc());
 	}
 
@@ -393,7 +392,6 @@ public class CodeGenerator {
 		int end = getPc() + 1;
 		for (Integer i : loopLink.breaks) {
 			codes.get(i).op1 = new Operand("im_i_" + end);
-			System.err.println("filled break in line: " + i + " with " + end);
 		}
 	}
 
@@ -626,14 +624,14 @@ public class CodeGenerator {
 		if (type.equals("string"))
 			makeCode("wt", "gi_i_8");
 		if (type.equals("boolean"))
-			makeCode("wi", "gi_b_8");
+			makeCode("wi", "gi_i_8");
 
 	}
 
 	public void cgpop() {
 		// checkType
-		VarSymbolTableEntry popped = (VarSymbolTableEntry) popSS();
 
+		VarSymbolTableEntry popped = (VarSymbolTableEntry) popSS();
 		// decrease stack pointer
 		makeCode("-sp", "im_i_4");
 
@@ -884,7 +882,6 @@ public class CodeGenerator {
 		makeCode(":=", "gd_i_4", "gi_i_8");
 		// increase stack pointer
 		makeCode("+sp", "im_i_4");
-
 		pushSS(new VarSymbolTableEntry("temp", -1, null, true, type));
 	}
 
@@ -977,17 +974,49 @@ public class CodeGenerator {
 	}
 
 	private void unary(String operand) {
-
-		if (popFirst().equals("integer")) {
-			// get a temp
-			makeCode("gmm", "im_i_4", "gd_i_4");
-			// unary this and set currentValue
-			makeCode(operand, "gi_i_8", "gi_i_4");
-			// push currentValue
-			this.pushCurrent("integer");
-		} else {
-			// TODO ERROR!
+		String type = popFirst();
+		if (operand.equals("u-")) {
+			if (type.equals("integer")) {
+				// get a temp
+				makeCode("gmm", "im_i_4", "gd_i_4");
+				// unary this and set currentValue
+				makeCode(operand, "gi_i_8", "gi_i_4");
+				// push currentValue
+				this.pushCurrent("integer");
+			} else if (type.equals("real")) {
+				// get a temp
+				makeCode("gmm", "im_i_4", "gd_i_4");
+				// unary this and set currentValue
+				makeCode(operand, "gi_f_8", "gi_f_4");
+				// push currentValue
+				this.pushCurrent("real");
+			} else {
+				throw new RuntimeException();
+			}
+		} else if (operand.equals("!")) {
+			if (type.equals("boolean")) {
+				// get a temp
+				makeCode("gmm", "im_i_1", "gd_i_4");
+				// unary this and set currentValue
+				makeCode(operand, "gi_b_8", "gi_b_4");
+				// push currentValue
+				this.pushCurrent("boolean");
+			} else {
+				throw new RuntimeException();
+			}
+		} else if (operand.equals("~")) {
+			if (type.equals("integer")) {
+				// get a temp
+				makeCode("gmm", "im_i_4", "gd_i_4");
+				// unary this and set currentValue
+				makeCode(operand, "gi_i_8", "gi_i_4");
+				// push currentValue
+				this.pushCurrent("integer");
+			} else {
+				throw new RuntimeException();
+			}
 		}
+
 	}
 
 	private String popFirst() {
