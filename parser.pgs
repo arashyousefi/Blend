@@ -427,7 +427,7 @@
       {
         "start": 19,
         "end": 20,
-        "token": "EXPR",
+        "token": "EXPR2",
         "func": "",
         "anchorX": 377.0,
         "anchorY": 175.5,
@@ -457,7 +457,7 @@
       {
         "start": 21,
         "end": 20,
-        "token": "EXPR",
+        "token": "EXPR2",
         "func": "",
         "anchorX": 523.5,
         "anchorY": 146.0,
@@ -897,7 +897,7 @@
       {
         "start": 45,
         "end": 46,
-        "token": "character",
+        "token": "char",
         "func": "makeCharacter",
         "anchorX": 249.0,
         "anchorY": 127.5,
@@ -917,7 +917,7 @@
       {
         "start": 45,
         "end": 46,
-        "token": "integer",
+        "token": "int",
         "func": "makeInteger",
         "anchorX": 248.0,
         "anchorY": 96.5,
@@ -1239,8 +1239,8 @@
         "isFinal": false
       },
       {
-        "x": 206.0,
-        "y": 592.0,
+        "x": 196.0,
+        "y": 574.0,
         "id": 69,
         "isFinal": false
       },
@@ -1282,7 +1282,7 @@
       },
       {
         "x": 433.0,
-        "y": 599.0,
+        "y": 597.0,
         "id": 76,
         "isFinal": false
       },
@@ -1445,8 +1445,8 @@
         "end": 69,
         "token": "return",
         "func": "",
-        "anchorX": 40.0,
-        "anchorY": 512.5,
+        "anchorX": 18.0,
+        "anchorY": 496.5,
         "isGraph": false,
         "isGlobal": false
       },
@@ -1763,11 +1763,11 @@
       {
         "start": 75,
         "end": 76,
-        "token": "id",
-        "func": "push",
+        "token": "EXPR",
+        "func": "",
         "anchorX": 372.5,
         "anchorY": 600.5,
-        "isGraph": false,
+        "isGraph": true,
         "isGlobal": false
       },
       {
@@ -1803,11 +1803,11 @@
       {
         "start": 78,
         "end": 76,
-        "token": "id",
-        "func": "push",
+        "token": "EXPR",
+        "func": "",
         "anchorX": 434.0,
         "anchorY": 653.0,
-        "isGraph": false,
+        "isGraph": true,
         "isGlobal": false
       },
       {
@@ -4450,5 +4450,367 @@
       }
     ],
     "start": 211
+  },
+  {
+    "name": "EXPR2",
+    "nodes": [
+      {
+        "x": 226.0,
+        "y": 114.0,
+        "id": 220,
+        "isFinal": false
+      },
+      {
+        "x": 345.0,
+        "y": 114.0,
+        "id": 221,
+        "isFinal": true
+      },
+      {
+        "x": 473.0,
+        "y": 115.0,
+        "id": 222,
+        "isFinal": false
+      }
+    ],
+    "edges": [
+      {
+        "start": 220,
+        "end": 221,
+        "token": "E92",
+        "func": "",
+        "anchorX": 280.5,
+        "anchorY": 113.0,
+        "isGraph": true,
+        "isGlobal": false
+      },
+      {
+        "start": 221,
+        "end": 222,
+        "token": "||",
+        "func": "",
+        "anchorX": 409.0,
+        "anchorY": 114.5,
+        "isGraph": false,
+        "isGlobal": false
+      },
+      {
+        "start": 222,
+        "end": 221,
+        "token": "E92",
+        "func": "logicalOr",
+        "anchorX": 402.0,
+        "anchorY": 69.5,
+        "isGraph": true,
+        "isGlobal": false
+      }
+    ],
+    "start": 220
+  },
+  {
+    "name": "E92",
+    "nodes": [
+      {
+        "x": 174.0,
+        "y": 161.0,
+        "id": 223,
+        "isFinal": false
+      },
+      {
+        "x": 313.0,
+        "y": 156.0,
+        "id": 224,
+        "isFinal": true
+      },
+      {
+        "x": 434.0,
+        "y": 161.0,
+        "id": 225,
+        "isFinal": false
+      }
+    ],
+    "edges": [
+      {
+        "start": 223,
+        "end": 224,
+        "token": "E82",
+        "func": "",
+        "anchorX": 243.5,
+        "anchorY": 158.5,
+        "isGraph": true,
+        "isGlobal": false
+      },
+      {
+        "start": 224,
+        "end": 225,
+        "token": "\u0026\u0026",
+        "func": "",
+        "anchorX": 373.5,
+        "anchorY": 158.5,
+        "isGraph": false,
+        "isGlobal": false
+      },
+      {
+        "start": 225,
+        "end": 224,
+        "token": "E82",
+        "func": "logicalAnd",
+        "anchorX": 366.5,
+        "anchorY": 112.5,
+        "isGraph": true,
+        "isGlobal": false
+      }
+    ],
+    "start": 223
+  },
+  {
+    "name": "E82",
+    "nodes": [
+      {
+        "x": 188.0,
+        "y": 146.0,
+        "id": 226,
+        "isFinal": false
+      },
+      {
+        "x": 325.0,
+        "y": 143.0,
+        "id": 227,
+        "isFinal": true
+      },
+      {
+        "x": 441.0,
+        "y": 144.0,
+        "id": 228,
+        "isFinal": false
+      }
+    ],
+    "edges": [
+      {
+        "start": 226,
+        "end": 227,
+        "token": "E72",
+        "func": "",
+        "anchorX": 256.5,
+        "anchorY": 144.5,
+        "isGraph": true,
+        "isGlobal": false
+      },
+      {
+        "start": 227,
+        "end": 228,
+        "token": "|",
+        "func": "",
+        "anchorX": 383.0,
+        "anchorY": 143.5,
+        "isGraph": false,
+        "isGlobal": false
+      },
+      {
+        "start": 228,
+        "end": 227,
+        "token": "E72",
+        "func": "bitWiseOr",
+        "anchorX": 383.0,
+        "anchorY": 90.5,
+        "isGraph": true,
+        "isGlobal": false
+      }
+    ],
+    "start": 226
+  },
+  {
+    "name": "E72",
+    "nodes": [
+      {
+        "x": 227.0,
+        "y": 157.0,
+        "id": 229,
+        "isFinal": false
+      },
+      {
+        "x": 364.0,
+        "y": 154.0,
+        "id": 230,
+        "isFinal": true
+      },
+      {
+        "x": 498.0,
+        "y": 151.0,
+        "id": 231,
+        "isFinal": false
+      }
+    ],
+    "edges": [
+      {
+        "start": 229,
+        "end": 230,
+        "token": "E62",
+        "func": "",
+        "anchorX": 295.5,
+        "anchorY": 155.5,
+        "isGraph": true,
+        "isGlobal": false
+      },
+      {
+        "start": 230,
+        "end": 231,
+        "token": "^",
+        "func": "",
+        "anchorX": 431.0,
+        "anchorY": 152.5,
+        "isGraph": false,
+        "isGlobal": false
+      },
+      {
+        "start": 231,
+        "end": 230,
+        "token": "E62",
+        "func": "xor",
+        "anchorX": 426.0,
+        "anchorY": 103.5,
+        "isGraph": true,
+        "isGlobal": false
+      }
+    ],
+    "start": 229
+  },
+  {
+    "name": "E62",
+    "nodes": [
+      {
+        "x": 248.0,
+        "y": 165.0,
+        "id": 232,
+        "isFinal": false
+      },
+      {
+        "x": 372.0,
+        "y": 167.0,
+        "id": 233,
+        "isFinal": true
+      },
+      {
+        "x": 481.0,
+        "y": 165.0,
+        "id": 234,
+        "isFinal": false
+      }
+    ],
+    "edges": [
+      {
+        "start": 232,
+        "end": 233,
+        "token": "E52",
+        "func": "",
+        "anchorX": 310.0,
+        "anchorY": 166.0,
+        "isGraph": true,
+        "isGlobal": false
+      },
+      {
+        "start": 233,
+        "end": 234,
+        "token": "\u0026",
+        "func": "",
+        "anchorX": 426.5,
+        "anchorY": 166.0,
+        "isGraph": false,
+        "isGlobal": false
+      },
+      {
+        "start": 234,
+        "end": 233,
+        "token": "E52",
+        "func": "bitWiseAnd",
+        "anchorX": 426.5,
+        "anchorY": 118.0,
+        "isGraph": true,
+        "isGlobal": false
+      }
+    ],
+    "start": 232
+  },
+  {
+    "name": "E52",
+    "nodes": [
+      {
+        "x": 178.0,
+        "y": 120.0,
+        "id": 235,
+        "isFinal": false
+      },
+      {
+        "x": 292.0,
+        "y": 116.0,
+        "id": 236,
+        "isFinal": true
+      },
+      {
+        "x": 414.0,
+        "y": 40.0,
+        "id": 237,
+        "isFinal": false
+      },
+      {
+        "x": 420.0,
+        "y": 158.0,
+        "id": 238,
+        "isFinal": false
+      }
+    ],
+    "edges": [
+      {
+        "start": 235,
+        "end": 236,
+        "token": "E3",
+        "func": "",
+        "anchorX": 235.0,
+        "anchorY": 118.0,
+        "isGraph": true,
+        "isGlobal": false
+      },
+      {
+        "start": 236,
+        "end": 237,
+        "token": "!\u003d",
+        "func": "",
+        "anchorX": 355.0,
+        "anchorY": 84.0,
+        "isGraph": false,
+        "isGlobal": false
+      },
+      {
+        "start": 236,
+        "end": 238,
+        "token": "\u003d",
+        "func": "",
+        "anchorX": 364.0,
+        "anchorY": 119.0,
+        "isGraph": false,
+        "isGlobal": false
+      },
+      {
+        "start": 237,
+        "end": 236,
+        "token": "E3",
+        "func": "notEqual",
+        "anchorX": 327.0,
+        "anchorY": 43.0,
+        "isGraph": true,
+        "isGlobal": false
+      },
+      {
+        "start": 238,
+        "end": 236,
+        "token": "E3",
+        "func": "equal",
+        "anchorX": 342.0,
+        "anchorY": 174.0,
+        "isGraph": true,
+        "isGlobal": false
+      }
+    ],
+    "start": 235
   }
 ]
