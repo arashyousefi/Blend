@@ -1,35 +1,18 @@
-structure struct
+integer a:=4;
+function (void) f()
 {
-    bool d1;
-    integer a2;
-    character d3;
-    string d4;
+    write(a);
+    a := a - 1;    
+    if(a>0){
+    	f();
+    	write(a);
+    };
+	return;
 }
 
 function (integer) main()
 {
-    struct data;
-    if(isvoid(data)) {
-        write("NULL\n");
-    };
-
-    array integer arr := [3, 4, 5] assign;
-
-    arr[0, 0, 0] := 983;
-    arr[2, 1, 2] := -4;
-
-    write(data.d1);
-    write("\n");
-    write(data.d2);
-    write("\n");
-    write(data.d3);
-    write("\n");
-    write(data.d4);
-    write("\n");
-    write(a[2, 1, 2]);
-
-    release data;
-    release arr;
-
-    return(arr);
+	integer  a:=1;
+	f();
+	
 }

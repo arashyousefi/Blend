@@ -10,7 +10,6 @@ public class Parser {
     public Stack<Integer> parseStack = new Stack<Integer>();
     public String[] symbols;
     public SymbolTable currentSymbolTable = new SymbolTable();
-    public ArrayList<SymbolTable> display = new ArrayList<>();
     public ArrayList<String> structs = new ArrayList<>();
     public String lastStruct;
 
@@ -18,7 +17,6 @@ public class Parser {
         try {
             this.parseTable = parseTable;
             this.symbols = symbols;
-            this.display.add(currentSymbolTable);
 
             scanner = new Scanner(inputFile, this);
             cg = new CodeGenerator(scanner, this);

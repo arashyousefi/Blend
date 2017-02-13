@@ -1,3 +1,4 @@
+import symbolTableEntry.FunctionSymbolTableEntry;
 import symbolTableEntry.LabelSymbolTableEntry;
 import symbolTableEntry.SymbolTable;
 import symbolTableEntry.SymbolTableEntry;
@@ -29,9 +30,10 @@ public class CodeGenerator {
 	int relativeAddress = 0;
 	String type;
 	Code previousIf;
-
+	int functionArgs = 0;
 	ArrayList<CaseLink> firstLinks = new ArrayList<>();
 	ArrayList<LoopLink> loopLinks = new ArrayList<>();
+	public ArrayList<ActivationRecord> display = new ArrayList<>();
 
 	public String[] bitwiseOperators = { "&", "|", "^", "%" };
 	public String[] logicalOperators = { "=", "!=", ">", "<", ">=", "<=", "&&", "||" };
@@ -160,8 +162,7 @@ public class CodeGenerator {
 	}
 
 	public void cgaddArg() {
-		// TODO
-
+		functionArgs++;
 	}
 
 	public void cgmakeLate() {
@@ -486,7 +487,14 @@ public class CodeGenerator {
 	}
 
 	public void cgcall() {
-		// todo
+		// push return point
+		makeCode(":=sp", "gd_i_4");
+		makeCode("+sp", "im_i_4");
+		makeCode(":=", "im_i_" + (getPc() + 3), "gi_i_4");
+
+		FunctionSymbolTableEntry func = (FunctionSymbolTableEntry) popSS();
+		makeCode("jmp", "im_i_" + (func.jumpCode + 1) + "");
+
 	}
 
 	public void cgmakeConstInteger() {
@@ -758,11 +766,43 @@ public class CodeGenerator {
 	}
 
 	public void cgmain() {
-		// todo
+		Integer jumpCode = (Integer) popSS();
+		codes.get(jumpCode).op1 = new Operand("im", "i", (jumpCode + 1) + "");
+	}
+
+	public void cginitiateFunc() {
+		SymbolTable symtab = new SymbolTable();
+		ActivationRecord ar = new ActivationRecord(symtab);
+		
 	}
 
 	public void cgcmpFunc() {
-		// todo
+		FunctionSymbolTableEntry func = (FunctionSymbolTableEntry) popSS();
+		func.args = functionArgs;
+
+	}
+
+	public void cgfJump() {
+		functionArgs = 0;
+
+		makeCode("jmp");
+		pushSS(getPc());
+	}
+
+	public void cgcmpFJump() {
+		makeCode("-sp", "im_i_4");
+		makeCode(":=sp", "gd_i_4");
+		makeCode("jmp", "gi_i_4");
+		Integer jumpCode = (Integer) popSS();
+		codes.get(jumpCode).op1 = new Operand("im", "i", (getPc() + 1) + "");
+	}
+
+	public void cgpushF() {
+		Integer jumpCode = (Integer) getPc();
+		FunctionSymbolTableEntry function = new FunctionSymbolTableEntry(scanner.previousID, -1,
+				parser.currentSymbolTable, jumpCode);
+		parser.currentSymbolTable.addSymbol(function);
+		pushSS(function);
 	}
 
 	public void cgassign() {
