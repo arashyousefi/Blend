@@ -1,7 +1,7 @@
-integer a:=4;
-function (integer) main()
+int a:=4;
+function (char) main()
 {
-	integer  a:=1;
+	int  a:=1;
 	write(a);
 	
 }
