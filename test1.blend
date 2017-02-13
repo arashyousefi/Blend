@@ -1,30 +1,35 @@
-function (integer, character) f (out integer a,late character b)
+structure struct
 {
-	
-	return (a,b);
+    bool d1;
+    integer a2;
+    character d3;
+    string d4;
 }
-integer a;
-environment env{
-	integer a := 4;
-	string b := 5;
-}
-structure s1{
-	integer a;
-	character b;
-	string c;
-}
+
 function (integer) main()
 {
-    integer a := 70;
-    write(a);
-    real b := 2;
-    write(b);
-    character c := 'a';
-    character d := 'd';
-	write(2.5*2);
-	write(2);
-	write( (2.5*2) > 2 );
-	a := [4,5,6] assign;
-	(a,b) := f(4,5);
-	s1 s ;
+    struct data;
+    if(isvoid(data)) {
+        write("NULL\n");
+    };
+
+    array integer arr := [3, 4, 5] assign;
+
+    arr[0, 0, 0] := 983;
+    arr[2, 1, 2] := -4;
+
+    write(data.d1);
+    write("\n");
+    write(data.d2);
+    write("\n");
+    write(data.d3);
+    write("\n");
+    write(data.d4);
+    write("\n");
+    write(a[2, 1, 2]);
+
+    release data;
+    release arr;
+
+    return(arr);
 }

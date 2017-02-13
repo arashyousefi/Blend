@@ -401,7 +401,7 @@ public class CodeGenerator {
 		whileCode.op2 = new Operand("im", "i", Integer.toString(getPc() + 2));
 
 		Integer whileEvalLine = (Integer) popSS();
-		makeCode("jmp", "im_i" + whileEvalLine);
+		makeCode("jmp", "im_i_" + whileEvalLine);
 		fillBreaks();
 	}
 
