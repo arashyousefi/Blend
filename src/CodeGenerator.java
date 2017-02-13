@@ -1131,7 +1131,7 @@ public class CodeGenerator {
 		// (strongly NOT recommended!!)
 		String output = "";
 		try {
-			PrintWriter writer = new PrintWriter(new File("sampleProgram.out"), "UTF-8");
+			PrintWriter writer = new PrintWriter(new File(outputName), "UTF-8");
 			for (Code code : codes) {
 				output = code.getText();
 				// writer.append(output);

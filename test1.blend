@@ -1,18 +1,7 @@
 integer a:=4;
-function (void) f()
-{
-    write(a);
-    a := a - 1;    
-    if(a>0){
-    	f();
-    	write(a);
-    };
-	return;
-}
-
 function (integer) main()
 {
 	integer  a:=1;
-	f();
+	write(a);
 	
 }
