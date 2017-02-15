@@ -15,11 +15,17 @@ public class CodeGenerator {
 	public static final int STRING_BUFFER_ADDRESS = 100 * 1000;
 	public static final int STRING_SIZE_ADDRESS = 99 * 1000;
 	public static final int STRING_ADDRESS_ADDRESS = 99 * 1000 + 4;
+	public static final int ACTIVATION_RECORD_SIZE = 10240;
+	public static final int RETURN_SIZE = 20;
+	public static final String BASE = "0";
 	public static final String FLOAT_H1 = "20";
 	public static final String FLOAT_H2 = "24";
 	public static final String FLOAT_H3 = "28";
 	public static final String FLOAT_H4 = "32";
 	public static final String CASTED = "36";
+	public static final String AR_H1 = "40";
+	public static final String FRAME_POINTER = "100";
+	public static final String HEAP_POINTER = "104";
 	Scanner scanner; // This was my way of informing CG about Constant Values
 	// detected by Scanner, you can do whatever you like
 
@@ -31,6 +37,8 @@ public class CodeGenerator {
 	String type;
 	Code previousIf;
 	int functionArgs = 0;
+	int parameterIndex;
+	public FunctionSymbolTableEntry currentFunc = null;
 	ArrayList<CaseLink> firstLinks = new ArrayList<>();
 	ArrayList<LoopLink> loopLinks = new ArrayList<>();
 	public ArrayList<ActivationRecord> display = new ArrayList<>();
@@ -139,8 +147,9 @@ public class CodeGenerator {
 	}
 
 	public void cgmake() {
+		boolean isGlobal = (parser.currentSymbolTable.parent == null) ? true : false;
 		parser.currentSymbolTable.addSymbol(new VarSymbolTableEntry(scanner.previousID,
-				relativeAddress, parser.currentSymbolTable, false, type));
+				relativeAddress, parser.currentSymbolTable, false, type, isGlobal));
 		// parser.currentSymbolTable.addSymbol(scanner.previousID, SymbolTableEntry.VAR,
 		// relativeAddress, false, type);
 		// needs TODO if we want to implement structures!
@@ -162,7 +171,21 @@ public class CodeGenerator {
 	}
 
 	public void cgaddArg() {
-		functionArgs++;
+		FunctionSymbolTableEntry func = (FunctionSymbolTableEntry) popSS();
+		func.argNames.add(scanner.previousID);
+		func.argTypes.add(type);
+		func.argAddress.add(functionArgs);
+		functionArgs += getTypeSize(type);
+		pushSS(func);
+	}
+
+	private int getTypeSize(String type) {
+		if (type.equals("boolean") || type.equals("character"))
+			return 1;
+		if (type.equals("integer") || type.equals("real"))
+			return 4;
+		return -1;
+
 	}
 
 	public void cgmakeLate() {
@@ -176,12 +199,18 @@ public class CodeGenerator {
 	}
 
 	public void cgstartBlock() {
+		if (parser.currentSymbolTable.parent == null)
+			makeCode(":=", "gd_i_" + FRAME_POINTER, "gd_i_" + BASE);
+
 		SymbolTable symbolTable = new SymbolTable(parser.currentSymbolTable);
 		parser.currentSymbolTable = symbolTable;
+
 	}
 
 	public void cgendBlock() {
 		parser.currentSymbolTable = parser.currentSymbolTable.parent;
+		if (parser.currentSymbolTable.parent == null)
+			makeCode(":=", "gd_i_" + HEAP_POINTER, "gd_i_" + BASE);
 	}
 
 	public void cgreleaseStr() {
@@ -483,17 +512,61 @@ public class CodeGenerator {
 	}
 
 	public void cgpushParameter() {
-		// todo
+		// pop the incoming argument from stack
+		String type = popFirst();
+
+		FunctionSymbolTableEntry func = (FunctionSymbolTableEntry) popSS();
+		// find address of the argument in the activation record!
+		makeCode("-", "gd_i_" + FRAME_POINTER, "im_i_" + func.argAddress.get(parameterIndex),
+				"gd_i_4");
+		// checkType
+		if (type.equals(func.argTypes.get(parameterIndex))) {
+			makeCode(":=", "gi_i_8", "gi_i_4");
+		} else {
+			// invalid argument type!
+			throw new RuntimeException("invalid argument type");
+		}
+		parameterIndex++;
+		pushSS(func);
+	}
+
+	public void cgpushFirstParameter() {
+		parameterIndex = 0;
+		// pop the incoming argument from stack
+		String type = popFirst();
+		// pop the caller
+		FunctionSymbolTableEntry func = (FunctionSymbolTableEntry) popSS();
+
+		// find address of the argument in the activation record!
+		makeCode("-", "gd_i_" + FRAME_POINTER, "im_i_" + func.argAddress.get(parameterIndex),
+				"gd_i_4");
+		// checkType
+		if (type.equals(func.argTypes.get(parameterIndex))) {
+			makeCode(":=", "gi_i_8", "gi_i_4");
+		} else {
+			// invalid argument type!
+			throw new RuntimeException("invalid argument type");
+		}
+		parameterIndex++;
+		// push caller for next arguments or call!
+		pushSS(func);
 	}
 
 	public void cgcall() {
-		// push return point
-		makeCode(":=sp", "gd_i_4");
-		makeCode("+sp", "im_i_4");
-		makeCode(":=", "im_i_" + (getPc() + 3), "gi_i_4");
+		int finish = 4;
 
+		// push return address
+		makeCode("-", "gd_i_" + FRAME_POINTER, "im_i_4", "gd_i_" + FRAME_POINTER);
+		makeCode(":=", "im_i_" + (getPc() + finish), "gi_i_" + FRAME_POINTER);
+		makeCode("+", "gd_i_" + FRAME_POINTER, "im_i_4", "gd_i_" + FRAME_POINTER);
+		// jump to the start of function
 		FunctionSymbolTableEntry func = (FunctionSymbolTableEntry) popSS();
 		makeCode("jmp", "im_i_" + (func.jumpCode + 1) + "");
+	}
+
+	public void cgpushReturn() {
+		makeCode("+", "im_i_" + ACTIVATION_RECORD_SIZE, "gd_i_" + FRAME_POINTER, "gd_i_"
+				+ FRAME_POINTER);
 
 	}
 
@@ -504,14 +577,14 @@ public class CodeGenerator {
 		boolean notSet = true;
 		if (id == null) {
 			id = new VarSymbolTableEntry(scanner.CV, relativeAddress, parser.currentSymbolTable,
-					false, "integer");
+					false, "integer", false);
 			parser.currentSymbolTable.addSymbol(id);
 			// id = parser.currentSymbolTable.addSymbol(scanner.CV, SymbolTableEntry.VAR,
 			// relativeAddress, false, "integer");
 			relativeAddress += 4;
 			// set the constant
 			// add relative address
-			makeCode("+", "gd_i_0", "im_i_" + Integer.toString(id.getAddress()), "gd_i_4");
+			makeCode("+", "gd_i_" + BASE, "im_i_" + Integer.toString(id.getAddress()), "gd_i_4");
 			// set constant value
 			makeCode(":=", "im_i_" + scanner.CV, "gi_i_4");
 			notSet = false;
@@ -527,14 +600,14 @@ public class CodeGenerator {
 		boolean notSet = true;
 		if (id == null) {
 			id = new VarSymbolTableEntry(scanner.CV, relativeAddress, parser.currentSymbolTable,
-					false, "character");
+					false, "character", false);
 			parser.currentSymbolTable.addSymbol(id);
 			// id = parser.currentSymbolTable.addSymbol(scanner.CV, SymbolTableEntry.VAR,
 			// relativeAddress, false, "integer");
 			relativeAddress += 1;
 			// set the constant
 			// add relative address
-			makeCode("+", "gd_i_0", "im_i_" + Integer.toString(id.getAddress()), "gd_i_4");
+			makeCode("+", "gd_i_" + BASE, "im_i_" + Integer.toString(id.getAddress()), "gd_i_4");
 			// set constant value
 			makeCode(":=", "im_c_" + scanner.CV.charAt(1), "gi_c_4");
 			notSet = false;
@@ -554,14 +627,14 @@ public class CodeGenerator {
 		boolean notSet = true;
 		if (id == null) {
 			id = new VarSymbolTableEntry(scanner.CV, relativeAddress, parser.currentSymbolTable,
-					false, "real");
+					false, "real", false);
 			parser.currentSymbolTable.addSymbol(id);
 			// id = parser.currentSymbolTable.addSymbol(scanner.CV, SymbolTableEntry.VAR,
 			// relativeAddress, false, "integer");
 			relativeAddress += 4;
 			// set the constant
 			// add relative address
-			makeCode("+", "gd_i_0", "im_i_" + Integer.toString(id.getAddress()), "gd_i_4");
+			makeCode("+", "gd_i_" + BASE, "im_i_" + Integer.toString(id.getAddress()), "gd_i_4");
 			// set constant value
 			makeCode(":=", "im_f_" + scanner.CV, "gi_f_4");
 			notSet = false;
@@ -585,12 +658,12 @@ public class CodeGenerator {
 		boolean notSet = true;
 		if (id == null) {
 			id = new VarSymbolTableEntry(scanner.CV, relativeAddress, parser.currentSymbolTable,
-					false, "boolean");
+					false, "boolean", false);
 			parser.currentSymbolTable.addSymbol(id);
 			relativeAddress++;
 			// set the constant
 			// find address
-			makeCode("+", "gd_i_0", "im_i_" + Integer.toString(id.getAddress()), "gd_i_4");
+			makeCode("+", "gd_i_" + BASE, "im_i_" + Integer.toString(id.getAddress()), "gd_i_4");
 			// set constant value
 			makeCode(":=", "im_b_" + (input ? "true" : "false"), "gi_b_4");
 			notSet = false;
@@ -601,7 +674,7 @@ public class CodeGenerator {
 
 	private void pushConst(boolean notSet, VarSymbolTableEntry id) {
 		if (notSet)
-			makeCode("+", "gd_i_0", "im_i_" + Integer.toString(id.getAddress()), "gd_i_4");
+			makeCode("+", "gd_i_" + BASE, "im_i_" + Integer.toString(id.getAddress()), "gd_i_4");
 		// push relative address:
 		// find the stack pointer
 		makeCode(":=sp", "gd_i_8");
@@ -768,33 +841,51 @@ public class CodeGenerator {
 	public void cgmain() {
 		Integer jumpCode = (Integer) popSS();
 		codes.get(jumpCode).op1 = new Operand("im", "i", (jumpCode + 1) + "");
+		makeCode(":=", "im_i_" + STRING_BUFFER_ADDRESS, "gd_i_" + FRAME_POINTER);
+		currentFunc = null;
 	}
 
 	public void cginitiateFunc() {
-		SymbolTable symtab = new SymbolTable();
-		ActivationRecord ar = new ActivationRecord(symtab);
-		
+		currentFunc = (FunctionSymbolTableEntry) popSS();
+		cgstartBlock();
 	}
 
 	public void cgcmpFunc() {
 		FunctionSymbolTableEntry func = (FunctionSymbolTableEntry) popSS();
 		func.args = functionArgs;
+		pushSS(func);
+
+	}
+
+	public void cgcmpMain() {
+
+		// cgendBlock();
 
 	}
 
 	public void cgfJump() {
-		functionArgs = 0;
+		functionArgs = 8;
 
 		makeCode("jmp");
 		pushSS(getPc());
 	}
 
 	public void cgcmpFJump() {
-		makeCode("-sp", "im_i_4");
-		makeCode(":=sp", "gd_i_4");
+		// find return address
+		makeCode("-", "gd_i_" + FRAME_POINTER, "im_i_4", "gd_i_" + FRAME_POINTER);
+		makeCode(":=", "gd_i_" + FRAME_POINTER, "gd_i_4");
+		makeCode("+", "gd_i_" + FRAME_POINTER, "im_i_4", "gd_i_" + FRAME_POINTER);
+
+		// decrease frame pointer
+		makeCode("-", "gd_i_" + FRAME_POINTER, "im_i_" + ACTIVATION_RECORD_SIZE, "gd_i_"
+				+ FRAME_POINTER);
+		// adjust symbol table start
+		makeCode(":=", "gd_i_" + FRAME_POINTER, "gd_i_" + BASE);
 		makeCode("jmp", "gi_i_4");
 		Integer jumpCode = (Integer) popSS();
 		codes.get(jumpCode).op1 = new Operand("im", "i", (getPc() + 1) + "");
+		cgendBlock();
+
 	}
 
 	public void cgpushF() {
@@ -802,6 +893,7 @@ public class CodeGenerator {
 		FunctionSymbolTableEntry function = new FunctionSymbolTableEntry(scanner.previousID, -1,
 				parser.currentSymbolTable, jumpCode);
 		parser.currentSymbolTable.addSymbol(function);
+
 		pushSS(function);
 	}
 
@@ -896,17 +988,50 @@ public class CodeGenerator {
 	public void cgpush() {
 		SymbolTableEntry id = parser.currentSymbolTable.findSymbol(scanner.previousID, true);
 		if (id == null) {
-			// TODO runtime exception here!
+			// it might be a function argument
+			if (currentFunc != null) {
+				for (String name : currentFunc.argNames) {
+					if (name.equals(scanner.previousID)) {
+						int index = currentFunc.argNames.indexOf(name);
+						VarSymbolTableEntry var = new VarSymbolTableEntry(name,
+								currentFunc.argAddress.get(index), parser.currentSymbolTable,
+								false, currentFunc.argTypes.get(index), false);
+						// find address:
+						makeCode("-", "gd_i_" + BASE,
+								"im_i_" + Integer.toString(currentFunc.argAddress.get(index)),
+								"gd_i_4");
+						// find the stack pointer
+						makeCode(":=sp", "gd_i_8");
+						// push address:
+						makeCode(":=", "gd_i_4", "gi_i_8");
+						// increase stack pointer
+						makeCode("+sp", "im_i_4");
+						// reset the frame pointer if global
+						pushSS(var);
+						return;
+					}
+				}
+			}
 		} else {
+			// if global should set global address!
+			VarSymbolTableEntry var = null;
+			if (id.getClass() == VarSymbolTableEntry.class) {
+				var = (VarSymbolTableEntry) id;
+				if (var.isGlobal)
+					makeCode(":=", "gd_i_" + HEAP_POINTER, "gd_i_" + BASE);
+			}
 			// find address:
-			makeCode("+", "gd_i_0", "im_i_" + Integer.toString(id.getAddress()), "gd_i_4");
+			makeCode("+", "gd_i_" + BASE, "im_i_" + Integer.toString(id.getAddress()), "gd_i_4");
 			// find the stack pointer
 			makeCode(":=sp", "gd_i_8");
 			// push address:
 			makeCode(":=", "gd_i_4", "gi_i_8");
 			// increase stack pointer
 			makeCode("+sp", "im_i_4");
-
+			// reset the frame pointer if global
+			if (var != null && var.isGlobal) {
+				makeCode(":=", "gd_i_" + FRAME_POINTER, "gd_i_" + BASE);
+			}
 			pushSS(id);
 		}
 	}
@@ -922,11 +1047,11 @@ public class CodeGenerator {
 		makeCode(":=", "gd_i_4", "gi_i_8");
 		// increase stack pointer
 		makeCode("+sp", "im_i_4");
-		pushSS(new VarSymbolTableEntry("temp", -1, null, true, type));
+		pushSS(new VarSymbolTableEntry("temp", -1, null, true, type, false));
 	}
 
 	private void init() {
-		makeCode("gmm", "im_i_1048576", "gd_i_0");
+		makeCode("gmm", "im_i_1024", "gd_i_" + HEAP_POINTER);
 
 	}
 
@@ -1120,7 +1245,7 @@ public class CodeGenerator {
 
 	public void FinishCode() // You may need this
 	{
-		makeCode("fmm", "gd_i_0", "im_i_1048576");
+		makeCode("fmm", "gd_i_" + HEAP_POINTER, "im_i_1024");
 	}
 
 	public void WriteOutput(String outputName) {
