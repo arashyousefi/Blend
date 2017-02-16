@@ -1,8 +1,4 @@
-import symbolTableEntry.FunctionSymbolTableEntry;
-import symbolTableEntry.LabelSymbolTableEntry;
-import symbolTableEntry.SymbolTable;
-import symbolTableEntry.SymbolTableEntry;
-import symbolTableEntry.VarSymbolTableEntry;
+import symbolTableEntry.*;
 
 import java.io.File;
 import java.io.IOException;

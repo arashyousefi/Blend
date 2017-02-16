@@ -9,5 +9,5 @@ function (int) fib(int n){
 }
 function (char) main()
 {
-	write(fib(5));
+	write(fib(10));
 }
