@@ -1,16 +1,8 @@
-function (void) f(int n1,int n2,int n3){
-	write(n1);
-	write(n2);
-	write(n3);
-	
-}
-function (void) g(int n1,int n2, int n3){
-	write(7);
-}
 function (char) main()
 {
-	int b:=5;
-	int a:=4;
-	f(a,b,3);
-	g(1,2,3);
+    string a := "123arash";
+    write(a);
+    write("kir");
+    read(a);
+    write(a);
 }
