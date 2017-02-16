@@ -36,15 +36,16 @@ public class CodeGenerator {
 	int relativeAddress = 0;
 	String type;
 	Code previousIf;
-	int functionArgs = 0;
+	int functionArgs = 0, retNum = 0;
 	int parameterIndex;
 	public FunctionSymbolTableEntry currentFunc = null;
-	ArrayList<CaseLink> firstLinks = new ArrayList<>();
-	ArrayList<LoopLink> loopLinks = new ArrayList<>();
+	public ArrayList<CaseLink> firstLinks = new ArrayList<>();
+	public ArrayList<LoopLink> loopLinks = new ArrayList<>();
+	public ArrayList<Integer> retLinks = new ArrayList<>();
 	public ArrayList<ActivationRecord> display = new ArrayList<>();
 
 	public String[] bitwiseOperators = { "&", "|", "^", "%" };
-	public String[] logicalOperators = { "=", "!=", ">", "<", ">=", "<=", "&&", "||" };
+	public String[] logicalOperators = { "==", "!=", ">", "<", ">=", "<=", "&&", "||" };
 	public String[] arithmeticOperators = { "*", "/", "+", "-" };
 	public String[] goodTypes = { "real", "integer", "boolean", "character" };
 
@@ -86,7 +87,6 @@ public class CodeGenerator {
 		// System.err.println(sem); // Just for debug
 		if (sem.equals("NoSem"))
 			return;
-
 		java.lang.reflect.Method method;
 		try {
 			method = this.getClass().getMethod("cg" + sem.substring(1));
@@ -143,15 +143,15 @@ public class CodeGenerator {
 	}
 
 	public void cgaddReturn() {
-		// todo
+		FunctionSymbolTableEntry func = (FunctionSymbolTableEntry) popSS();
+		func.retTypes.add(type);
+		pushSS(func);
 	}
 
 	public void cgmake() {
-		boolean isGlobal = (parser.currentSymbolTable.parent == null) ? true : false;
+		boolean isGlobal = (parser.currentSymbolTable.parent == null);
 		parser.currentSymbolTable.addSymbol(new VarSymbolTableEntry(scanner.previousID,
 				relativeAddress, parser.currentSymbolTable, false, type, isGlobal));
-		// parser.currentSymbolTable.addSymbol(scanner.previousID, SymbolTableEntry.VAR,
-		// relativeAddress, false, type);
 		// needs TODO if we want to implement structures!
 		if (type.equals("boolean"))
 			relativeAddress++;
@@ -234,9 +234,27 @@ public class CodeGenerator {
 		loopLinks.get(loopLinks.size() - 1).breaks.add(getPc());
 	}
 
-	public void cgreturn() {
-		// TODO
+	public void cgresetRetNum() {
+		retNum = 0;
 
+	}
+
+	public void cgaddRetNum() {
+		retNum++;
+
+	}
+
+	public void cgreturn() {
+		int retSize = 0;
+		for (int i = 0; i < retNum; ++i) {
+			makeCode("-", "gd_i_" + FRAME_POINTER, "im_i_" + (RETURN_SIZE - retSize), "gd_i_12");
+			String type = popFirst();
+			makeCode(":=", "gi_i_8", "gi_i_12");
+			retSize += getTypeSize(type);
+		}
+		// jump out;
+		makeCode("jmp");
+		retLinks.add(getPc());
 	}
 
 	public void cgassignMulti() {
@@ -517,8 +535,8 @@ public class CodeGenerator {
 
 		FunctionSymbolTableEntry func = (FunctionSymbolTableEntry) popSS();
 		// find address of the argument in the activation record!
-		makeCode("-", "gd_i_" + FRAME_POINTER, "im_i_" + func.argAddress.get(parameterIndex),
-				"gd_i_4");
+		makeCode("+", "gd_i_" + FRAME_POINTER,
+				"im_i_" + (ACTIVATION_RECORD_SIZE - func.argAddress.get(parameterIndex)), "gd_i_4");
 		// checkType
 		if (type.equals(func.argTypes.get(parameterIndex))) {
 			makeCode(":=", "gi_i_8", "gi_i_4");
@@ -538,8 +556,8 @@ public class CodeGenerator {
 		FunctionSymbolTableEntry func = (FunctionSymbolTableEntry) popSS();
 
 		// find address of the argument in the activation record!
-		makeCode("-", "gd_i_" + FRAME_POINTER, "im_i_" + func.argAddress.get(parameterIndex),
-				"gd_i_4");
+		makeCode("+", "gd_i_" + FRAME_POINTER,
+				"im_i_" + (ACTIVATION_RECORD_SIZE - func.argAddress.get(parameterIndex)), "gd_i_4");
 		// checkType
 		if (type.equals(func.argTypes.get(parameterIndex))) {
 			makeCode(":=", "gi_i_8", "gi_i_4");
@@ -553,20 +571,27 @@ public class CodeGenerator {
 	}
 
 	public void cgcall() {
-		int finish = 4;
-
+		int finish = 5;
+		// increase framepointer
+		makeCode("+", "im_i_" + ACTIVATION_RECORD_SIZE, "gd_i_" + FRAME_POINTER, "gd_i_"
+				+ FRAME_POINTER);
 		// push return address
 		makeCode("-", "gd_i_" + FRAME_POINTER, "im_i_4", "gd_i_" + FRAME_POINTER);
 		makeCode(":=", "im_i_" + (getPc() + finish), "gi_i_" + FRAME_POINTER);
 		makeCode("+", "gd_i_" + FRAME_POINTER, "im_i_4", "gd_i_" + FRAME_POINTER);
+
 		// jump to the start of function
 		FunctionSymbolTableEntry func = (FunctionSymbolTableEntry) popSS();
-		makeCode("jmp", "im_i_" + (func.jumpCode + 1) + "");
+		makeCode("-sp", "im_i_4");
+
+		makeCode("jmp", "im_i_" + (func.jumpCode + 1));
+		// push return values
+		for (String type : func.retTypes) {
+			pushSS(new VarSymbolTableEntry("temp", -1, null, true, type, false));
+		}
 	}
 
 	public void cgpushReturn() {
-		makeCode("+", "im_i_" + ACTIVATION_RECORD_SIZE, "gd_i_" + FRAME_POINTER, "gd_i_"
-				+ FRAME_POINTER);
 
 	}
 
@@ -705,7 +730,7 @@ public class CodeGenerator {
 		if (type.equals("string"))
 			makeCode("wt", "gi_i_8");
 		if (type.equals("boolean"))
-			makeCode("wi", "gi_i_8");
+			makeCode("wi", "gi_b_8");
 
 	}
 
@@ -839,9 +864,9 @@ public class CodeGenerator {
 	}
 
 	public void cgmain() {
+		popSS();
 		Integer jumpCode = (Integer) popSS();
 		codes.get(jumpCode).op1 = new Operand("im", "i", (jumpCode + 1) + "");
-		makeCode(":=", "im_i_" + STRING_BUFFER_ADDRESS, "gd_i_" + FRAME_POINTER);
 		currentFunc = null;
 	}
 
@@ -865,36 +890,58 @@ public class CodeGenerator {
 
 	public void cgfJump() {
 		functionArgs = 8;
+		retLinks = new ArrayList<>();
 
 		makeCode("jmp");
+
+		FunctionSymbolTableEntry function = new FunctionSymbolTableEntry(null, -1,
+				parser.currentSymbolTable, 0);
 		pushSS(getPc());
+		pushSS(function);
 	}
 
 	public void cgcmpFJump() {
+		int finish = 4;
 		// find return address
-		makeCode("-", "gd_i_" + FRAME_POINTER, "im_i_4", "gd_i_" + FRAME_POINTER);
-		makeCode(":=", "gd_i_" + FRAME_POINTER, "gd_i_4");
-		makeCode("+", "gd_i_" + FRAME_POINTER, "im_i_4", "gd_i_" + FRAME_POINTER);
+		makeCode("-", "gd_i_" + FRAME_POINTER, "im_i_4", "gd_i_36");
+
+		// fill return addresses to this jump
+		for (Integer jmp : retLinks) {
+			codes.get(jmp).op1 = new Operand("im_i_" + getPc());
+		}
+
+		// push return value
+		makeCode(":=sp", "gd_i_4");
+		makeCode("gmm", "im_i_4", "gd_i_16");
+		makeCode("-", "gd_i_" + (FRAME_POINTER), "im_i_" + RETURN_SIZE, "gd_i_12");
+		makeCode(":=", "gi_i_12", "gi_i_16");
+		makeCode(":=", "gd_i_16", "gi_i_4");
+		makeCode("+sp", "im_i_4");
 
 		// decrease frame pointer
 		makeCode("-", "gd_i_" + FRAME_POINTER, "im_i_" + ACTIVATION_RECORD_SIZE, "gd_i_"
 				+ FRAME_POINTER);
 		// adjust symbol table start
 		makeCode(":=", "gd_i_" + FRAME_POINTER, "gd_i_" + BASE);
-		makeCode("jmp", "gi_i_4");
+		// fill the jumpcode at the start of the function
 		Integer jumpCode = (Integer) popSS();
-		codes.get(jumpCode).op1 = new Operand("im", "i", (getPc() + 1) + "");
+		codes.get(jumpCode).op1 = new Operand("im", "i", (getPc() + finish) + "");
+
+		// jump to return point
+		makeCode("jmp", "gi_i_36");
+
 		cgendBlock();
 
 	}
 
 	public void cgpushF() {
+		FunctionSymbolTableEntry func = (FunctionSymbolTableEntry) popSS();
 		Integer jumpCode = (Integer) getPc();
-		FunctionSymbolTableEntry function = new FunctionSymbolTableEntry(scanner.previousID, -1,
-				parser.currentSymbolTable, jumpCode);
-		parser.currentSymbolTable.addSymbol(function);
+		func.name = scanner.previousID;
+		func.jumpCode = jumpCode;
+		parser.currentSymbolTable.addSymbol(func);
 
-		pushSS(function);
+		pushSS(func);
 	}
 
 	public void cgassign() {
@@ -910,7 +957,6 @@ public class CodeGenerator {
 				makeCode(":=", "gi_c_8", "gi_c_12");
 			if (type1.equals("real"))
 				makeCode(":=", "gi_f_8", "gi_f_12");
-
 		} else {
 			if (type1.equals("real") && type2.equals("integer")) {
 				ftoi("gi_f_8", "gi_i_12");
@@ -1052,6 +1098,7 @@ public class CodeGenerator {
 
 	private void init() {
 		makeCode("gmm", "im_i_1024", "gd_i_" + HEAP_POINTER);
+		makeCode(":=", "im_i_" + STRING_BUFFER_ADDRESS, "gd_i_" + FRAME_POINTER);
 
 	}
 

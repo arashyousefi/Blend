@@ -1,16 +1,13 @@
-function (void) f(int n1,int n2,int n3){
-	write(n1);
-	write(n2);
-	write(n3);
-	
-}
-function (void) g(int n1,int n2, int n3){
-	write(7);
+function (int) fib(int n){
+	if(n = 1){
+		return(1);
+	};
+	if(n = 2){
+		return(1);
+	};
+	return (fib(n-1) + fib(n-2));
 }
 function (char) main()
 {
-	int b:=5;
-	int a:=4;
-	f(a,b,3);
-	g(1,2,3);
+	write(fib(5));
 }
