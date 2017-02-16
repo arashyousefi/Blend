@@ -1,7 +1,16 @@
-int a:=4;
-function (int) main()
+function (void) f(int n1,int n2,int n3){
+	write(n1);
+	write(n2);
+	write(n3);
+	
+}
+function (void) g(int n1,int n2, int n3){
+	write(7);
+}
+function (char) main()
 {
-	int  a:=1;
-	write(a)
-	return 0;
+	int b:=5;
+	int a:=4;
+	f(a,b,3);
+	g(1,2,3);
 }
