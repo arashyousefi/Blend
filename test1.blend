@@ -1,10 +1,10 @@
+function (real) cat(real s1,real s2){
+	return (s1+s2);
+
+}
 function (char) main()
 {
-    string s := "a";
+    char s := 'a';
 	string s1 := "1234567";
-	string s2 := "89";
-	string s3 := concat(s1, s2);
-	write(concat(s3, s));
-	string s4 := concat(s3, s);
-	write(strlen(s4));
+	write(cat(1.5,1.2));
 }

@@ -249,7 +249,10 @@ public class CodeGenerator {
 		for (int i = 0; i < retNum; ++i) {
 			makeCode("-", "gd_i_" + FRAME_POINTER, "im_i_" + (RETURN_SIZE - retSize), "gd_i_12");
 			String type = popFirst();
-			makeCode(":=", "gi_i_8", "gi_i_12");
+			String mode = type.charAt(0) + "";
+			if (mode.equals("r"))
+				mode = "f";
+			makeCode(":=", "gi_" + mode + "_8", "gi_" + mode + "_12");
 			retSize += getTypeSize(type);
 		}
 		// jump out;
@@ -518,7 +521,10 @@ public class CodeGenerator {
 				"im_i_" + (ACTIVATION_RECORD_SIZE - func.argAddress.get(parameterIndex)), "gd_i_4");
 		// checkType
 		if (type.equals(func.argTypes.get(parameterIndex))) {
-			makeCode(":=", "gi_i_8", "gi_i_4");
+			String mode = type.charAt(0) + "";
+			if (mode.equals("r"))
+				mode = "f";
+			makeCode(":=", "gi_" + mode + "_8", "gi_" + mode + "_4");
 		} else {
 			// invalid argument type!
 			throw new RuntimeException("invalid argument type");
@@ -539,7 +545,10 @@ public class CodeGenerator {
 				"im_i_" + (ACTIVATION_RECORD_SIZE - func.argAddress.get(parameterIndex)), "gd_i_4");
 		// checkType
 		if (type.equals(func.argTypes.get(parameterIndex))) {
-			makeCode(":=", "gi_i_8", "gi_i_4");
+			String mode = type.charAt(0) + "";
+			if (mode.equals("r"))
+				mode = "f";
+			makeCode(":=", "gi_" + mode + "_8", "gi_" + mode + "_4");
 		} else {
 			// invalid argument type!
 			throw new RuntimeException("invalid argument type");
@@ -970,7 +979,10 @@ public class CodeGenerator {
 		makeCode(":=sp", "gd_i_4");
 		makeCode("gmm", "im_i_4", "gd_i_16");
 		makeCode("-", "gd_i_" + (FRAME_POINTER), "im_i_" + RETURN_SIZE, "gd_i_12");
-		makeCode(":=", "gi_i_12", "gi_i_16");
+		String mode = currentFunc.retTypes.get(0).charAt(0) + "";
+		if (mode.equals("r"))
+			mode = "f";
+		makeCode(":=", "gi_" + mode + "_12", "gi_" + mode + "_16");
 		makeCode(":=", "gd_i_16", "gi_i_4");
 		makeCode("+sp", "im_i_4");
 
