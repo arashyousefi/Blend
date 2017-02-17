@@ -806,7 +806,7 @@ public class CodeGenerator {
         makeCode(":=", input, "gd_i_" + MY_STRING_LOOPING_HELPER_ADDRESS);
         // loop:
         // if str[index] is 0 goto end
-        makeCode("!=", "im_i_0", "gi_i_" + MY_STRING_LOOPING_HELPER_ADDRESS, "gd_b_" +
+        makeCode("!=", "im_b_false", "gi_c_" + MY_STRING_LOOPING_HELPER_ADDRESS, "gd_b_" +
                 MY_STRING_FLAG_HELPER_ADDRESS);
         makeCode("jz", "gd_b_" + MY_STRING_FLAG_HELPER_ADDRESS, "im_i_" + end);
         // ++size
@@ -839,6 +839,63 @@ public class CodeGenerator {
                 MY_STRING_ADDRESS_HELPER_ADDRESS);
         // set address
         makeCode(":=", "gd_i_" + MY_STRING_ADDRESS_HELPER_ADDRESS, address);
+    }
+
+    public void cgconcat() {
+        String type1 = popFirst();
+        String type2 = popSecond();
+        if (!type1.equals("string") || !type2.equals("string")) {
+            throw new RuntimeException(String.format("Invalid types: %s %s, expected string",
+                    type1, type2));
+        }
+        makeCode("gmm", "im_i_4", "gd_i_4"); // address of string ptr
+
+//        makeCode("wt", "im_c_a");
+//        makeCode("wi", "gd_i_4");
+
+        get_string_size("gi_i_12", "gd_i_16");
+        get_string_size("gi_i_8", "gd_i_20");
+
+//        makeCode("wt", "im_c_b");
+//        makeCode("wi", "gd_i_16");
+//        makeCode("wt", "im_c_c");
+//        makeCode("wi", "gd_i_20");
+
+        makeCode("+", "gd_i_16", "gd_i_20", "gd_i_24"); // total size needed
+        makeCode("+", "im_i_1", "gd_i_24", "gd_i_24");
+        makeCode("gmm", "gd_i_24", "gd_i_" + MY_STRING_ADDRESS_HELPER_ADDRESS); // address of
+        // start of string
+        makeCode(":=", "gd_i_" + MY_STRING_ADDRESS_HELPER_ADDRESS, "gi_i_4");
+        VarSymbolTableEntry varSymbolTableEntry = new VarSymbolTableEntry("temp", -1, parser
+                .currentSymbolTable, true, "string", false);
+
+        makeCode(":=sp", "gd_i_28");
+        makeCode(":=", "gd_i_4", "gi_i_28");
+        makeCode("+sp", "im_i_4");
+
+
+        makeCode(":=", "gi_i_4", "gd_i_4");
+        makeCode(":=", "gi_i_8", "gd_i_8");
+        makeCode(":=", "gi_i_12", "gd_i_12");
+        makeCode(":=", "gi_s_12", "gi_s_4");
+        makeCode("+", "gd_i_16", "gd_i_4", "gd_i_4");
+        makeCode(":=", "gi_s_8", "gi_s_4");
+        pushSS(varSymbolTableEntry);
+    }
+
+    public void cgstrlen() {
+        String type = popFirst();
+        if (!type.equals("string")) {
+            throw new RuntimeException(String.format("Invalid type: %s, expected string", type));
+        }
+        makeCode("gmm", "im_i_4", "gd_i_12");
+        get_string_size("gi_i_8", "gi_i_12");
+        VarSymbolTableEntry varSymbolTableEntry = new VarSymbolTableEntry("temp", -1, parser
+                .currentSymbolTable, true, "integer", false);
+        makeCode(":=sp", "gd_i_4");
+        makeCode(":=", "gd_i_12", "gi_i_4");
+        makeCode("+sp", "im_i_4");
+        pushSS(varSymbolTableEntry);
     }
 
     public void cgassignStr() {

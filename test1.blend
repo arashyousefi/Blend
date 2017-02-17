@@ -1,13 +1,10 @@
-function (int) fib(int n){
-	if(n = 1){
-		return(1);
-	};
-	if(n = 2){
-		return(1);
-	};
-	return (fib(n-1) + fib(n-2));
-}
 function (char) main()
 {
-	write(fib(10));
+    string s := "a";
+	string s1 := "1234567";
+	string s2 := "89";
+	string s3 := concat(s1, s2);
+	write(concat(s3, s));
+	string s4 := concat(s3, s);
+	write(strlen(s4));
 }
