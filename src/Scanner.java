@@ -44,6 +44,9 @@ public class Scanner {
 			// .type,
 			// token.id));
 			CV = token.id;
+			if (token.type.equals("idHEX")){
+                CV = Integer.parseInt(CV.substring(2), 16) + "";
+            }
 			// System.err.println("return value is: " + token.type);
 			return token.type;
 		}

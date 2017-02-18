@@ -1,18 +1,5 @@
 function (int) main()
 {
-    int sum := 0;
-    int i := 0;
-
-    while(i < 10) {
-        sum = sum + i;
-        i := i+1;
-    };
-
-    if(sum >= 100) {
-        write(sum);
-    }
-    else {
-        write(100 - sum);
-    };
-    int rett := 0; return(rett);
+    int x = 0xf;
+    write(x);
 }
