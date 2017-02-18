@@ -666,7 +666,7 @@ public class CodeGenerator {
             makeCode("gmm", "im_i_" + (scanner.CV.length() + 1), "gi_i_4");
             makeCode(":=", "gi_i_4", "gd_i_" + MY_STRING_LOOPING_HELPER_ADDRESS);
             for (int i = 0; i < str.length(); ++i) {
-                makeCode(":=", "im_c_" + str.charAt(i), "gi_c_" +
+                makeCode(":=", "im_i_" + (int)str.charAt(i), "gi_c_" +
                         MY_STRING_LOOPING_HELPER_ADDRESS);
                 makeCode("+", "im_i_1", "gd_i_" + MY_STRING_LOOPING_HELPER_ADDRESS, "gd_i_"
                         + MY_STRING_LOOPING_HELPER_ADDRESS);
