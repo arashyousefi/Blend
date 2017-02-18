@@ -43,7 +43,7 @@ CommentContent       = ( [^*] | \*+ [^/*] )*
 Identifier = [:jletter:] [:jletterdigit:]*
 
 DecIntegerLiteral = [0-9]*
-HexIntegerLiteral = 0x[0-9]*
+HexIntegerLiteral = 0x[0-9a-f]+
 RealLiteral = [0-9]+\.[0-9]* | [0-9]*\.[0-9]+
 CharLiteral = '[^']' | '\''
 
@@ -89,14 +89,15 @@ CharLiteral = '[^']' | '\''
 <YYINITIAL> "write"                     { return new Token("KEYWORD", yytext()); }
 
 <YYINITIAL> {
-  /* identifiers */
-  {Identifier}                   { return new Token("idID", yytext()); }
-
   /* literals */
   {HexIntegerLiteral}            { return new Token("idHEX", yytext()); }
   {RealLiteral}                  { return new Token("idREAL", yytext()); }
   {CharLiteral}                  { return new Token("idCHAR", yytext()); }
   {DecIntegerLiteral}            { return new Token("idINT", yytext()); }
+
+  /* identifiers */
+  {Identifier}                   { return new Token("idID", yytext()); }
+
   \"                             { string.setLength(0); yybegin(STRING); }
 
   /* syntax */

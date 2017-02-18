@@ -1,5 +1,5 @@
 function (int) main()
 {
-    int x = 0xf;
+    int x := 0x1f;
     write(x);
 }
