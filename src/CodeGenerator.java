@@ -790,8 +790,7 @@ public class CodeGenerator {
 			makeCode("gmm", "im_i_4", "gd_i_16");
 			makeCode(":=", "gi_b_8", "gi_b_16");
 			makeCode("wi", "gi_i_16");
-			makeCode("gmm", "gd_i_16", "im_i_4");
-
+			makeCode("fmm", "gd_i_16", "im_i_4");
 		}
 
 	}
@@ -1048,10 +1047,10 @@ public class CodeGenerator {
 				makeCode(":=", "gi_i_12", "gd_i_12");
 				makeCode(":=", "gi_i_16", "gd_i_16");
 				makeCode(":=", "gi_s_12", "gi_s_16");
-				
+
 			}
 			makeCode("+sp", "im_i_4");
-			
+
 		}
 		// decrease frame pointer
 		makeCode("-", "gd_i_" + FRAME_POINTER, "im_i_" + ACTIVATION_RECORD_SIZE, "gd_i_"
@@ -1391,7 +1390,7 @@ public class CodeGenerator {
 
 	private void freeIfTemp(VarSymbolTableEntry popped) {
 		if (popped.val)
-			makeCode("fmm", "gd_i_8", "im_i_4");
+			makeCode("fmm", "gd_i_8", "im_i_" + getTypeSize(popped.type));
 	}
 
 	private String popSecond() {
@@ -1410,7 +1409,7 @@ public class CodeGenerator {
 
 	private void freeIfTemp2(VarSymbolTableEntry popped) {
 		if (popped.val)
-			makeCode("fmm", "gd_i_12", "im_i_4");
+			makeCode("fmm", "gd_i_12", "im_i_"+ getTypeSize(popped.type));
 	}
 
 	private boolean isLogicalOperator(String op) {
