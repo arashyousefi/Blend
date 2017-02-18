@@ -1,5 +1,18 @@
+environment env{
+
+	int dc11;
+}
+function (int) cat(int n){
+	if(n = 1 || n = 0){
+		return (n);
+	};
+	
+	return(cat(n-1) + cat(n-2));
+}
 function (int) main()
 {
-    string s := "a\tb\n";
-    write(s);
+    string s3 := "a";
+    string s4 := "b";
+    
+    write(cat(10));
 }
