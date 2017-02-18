@@ -244,15 +244,19 @@ public class CodeGenerator {
 	}
 
 	public void cgreturn() {
-		int retSize = 0;
-		for (int i = 0; i < retNum; ++i) {
-			makeCode("-", "gd_i_" + FRAME_POINTER, "im_i_" + (RETURN_SIZE - retSize), "gd_i_12");
-			String type = popFirst();
-			String mode = type.charAt(0) + "";
-			if (mode.equals("r"))
-				mode = "f";
-			makeCode(":=", "gi_" + mode + "_8", "gi_" + mode + "_12");
-			retSize += getTypeSize(type);
+		if (!(currentFunc == null)) {
+
+			int retSize = 0;
+			for (int i = 0; i < retNum; ++i) {
+				makeCode("-", "gd_i_" + FRAME_POINTER, "im_i_" + (RETURN_SIZE - retSize),
+						"gd_i_12");
+				String type = popFirst();
+				String mode = type.charAt(0) + "";
+				if (mode.equals("r"))
+					mode = "f";
+				makeCode(":=", "gi_" + mode + "_8", "gi_" + mode + "_12");
+				retSize += getTypeSize(type);
+			}
 		}
 		// jump out;
 		makeCode("jmp");
@@ -952,9 +956,19 @@ public class CodeGenerator {
 	}
 
 	public void cgcmpMain() {
+		// fill return addresses to this jump
+		for (Integer jmp : retLinks) {
+			codes.get(jmp).op1 = new Operand("im_i_" + (getPc() + 1));
+		}
+		// push return value
+		makeCode(":=sp", "gd_i_4");
+		makeCode("gmm", "im_i_4", "gd_i_16");
+		makeCode("-", "gd_i_" + (FRAME_POINTER), "im_i_" + RETURN_SIZE, "gd_i_12");
+		makeCode(":=", "gi_i_12", "gi_i_16");
+		makeCode(":=", "gd_i_16", "gi_i_4");
+		makeCode("+sp", "im_i_4");
 
-		// cgendBlock();
-
+		cgendBlock();
 	}
 
 	public void cgfJump() {
@@ -978,18 +992,18 @@ public class CodeGenerator {
 		for (Integer jmp : retLinks) {
 			codes.get(jmp).op1 = new Operand("im_i_" + getPc());
 		}
-
-		// push return value
-		makeCode(":=sp", "gd_i_4");
-		makeCode("gmm", "im_i_4", "gd_i_16");
-		makeCode("-", "gd_i_" + (FRAME_POINTER), "im_i_" + RETURN_SIZE, "gd_i_12");
-		String mode = currentFunc.retTypes.get(0).charAt(0) + "";
-		if (mode.equals("r"))
-			mode = "f";
-		makeCode(":=", "gi_" + mode + "_12", "gi_" + mode + "_16");
-		makeCode(":=", "gd_i_16", "gi_i_4");
-		makeCode("+sp", "im_i_4");
-
+		if (!currentFunc.retTypes.isEmpty()) {
+			// push return value
+			makeCode(":=sp", "gd_i_4");
+			makeCode("gmm", "im_i_4", "gd_i_16");
+			makeCode("-", "gd_i_" + (FRAME_POINTER), "im_i_" + RETURN_SIZE, "gd_i_12");
+			String mode = currentFunc.retTypes.get(0).charAt(0) + "";
+			if (mode.equals("r"))
+				mode = "f";
+			makeCode(":=", "gi_" + mode + "_12", "gi_" + mode + "_16");
+			makeCode(":=", "gd_i_16", "gi_i_4");
+			makeCode("+sp", "im_i_4");
+		}
 		// decrease frame pointer
 		makeCode("-", "gd_i_" + FRAME_POINTER, "im_i_" + ACTIVATION_RECORD_SIZE, "gd_i_"
 				+ FRAME_POINTER);

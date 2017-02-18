@@ -1,18 +1,13 @@
+int a:= 4;
+function (void) f(int n){
+	n:= n-1;
+	write(n);
+	return;
+}
 function (int) main()
 {
-    int sum := 0;
-    int i := 0;
-
-    while(i < 10) {
-        sum := sum + i;
-        i := i+1;
-    };
-
-    if(sum >= 100) {
-        write(sum);
-    }
-    else {
-        write(100 - sum);
-    };
-    int rett := 0; return(rett);
+	f(a);
+	return(f(a));
+	write(a);
+	return(0);
 }
