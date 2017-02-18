@@ -1,0 +1,19 @@
+function (int) fib(int n)
+{
+    if(n = 0 || n = 1) {
+        return(n);
+    };
+
+    int res := fib(n-1) + fib(n-2);
+
+    return(res);
+}
+
+function (int) main()
+{
+    int n;
+    read(n);
+    write(fib(n));
+    int ret := 0;
+    return(ret);
+}
