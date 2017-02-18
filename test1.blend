@@ -1,10 +1,18 @@
-function (real) cat(real s1,real s2){
-	return (s1+s2);
-
-}
-function (char) main()
+function (int) main()
 {
-    char s := 'a';
-	string s1 := "1234567";
-	write(cat(1.5,1.2));
+    int sum := 0;
+    int i := 0;
+
+    while(i < 10) {
+        sum := sum + i;
+        i := i+1;
+    };
+
+    if(sum >= 100) {
+        write(sum);
+    }
+    else {
+        write(100 - sum);
+    };
+    int rett := 0; return(rett);
 }

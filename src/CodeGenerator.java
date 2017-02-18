@@ -94,7 +94,6 @@ public class CodeGenerator {
 		// System.err.println(sem); // Just for debug
 		if (sem.equals("NoSem"))
 			return;
-
 		java.lang.reflect.Method method;
 		try {
 			method = this.getClass().getMethod("cg" + sem.substring(1));
@@ -746,8 +745,13 @@ public class CodeGenerator {
 			makeCode(":=", "gi_i_8", "gd_i_8");
 			makeCode("wt", "gi_s_8");
 		}
-		if (type.equals("boolean"))
-			makeCode("wi", "gi_i_8");
+		if (type.equals("boolean")) {
+			makeCode("gmm", "im_i_4", "gd_i_16");
+			makeCode(":=", "gi_b_8", "gi_b_16");
+			makeCode("wi", "gi_i_16");
+			makeCode("gmm", "gd_i_16", "im_i_4");
+
+		}
 
 	}
 
